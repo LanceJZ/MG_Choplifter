@@ -23,6 +23,9 @@ namespace MGChoplifter
         Entities.MountianControl Mountians;
         Engine.AModel Base;
 
+        Engine.Plane[] Grass = new Engine.Plane[20];
+        float[] GrassX = new float[20];
+
         public Game1()
         {
             GraphicsDM = new GraphicsDeviceManager(this);
@@ -34,8 +37,14 @@ namespace MGChoplifter
             GraphicsDM.PreferMultiSampling = true; //Error in MonoGame 3.6 for DirectX, fixed for dev version.
             GraphicsDM.PreparingDeviceSettings += SetMultiSampling;
             GraphicsDM.ApplyChanges();
+            GraphicsDM.GraphicsDevice.RasterizerState = new RasterizerState();
             IsFixedTimeStep = false;
             Content.RootDirectory = "Content";
+
+            for (int i = 0; i < 20; i++)
+            {
+                Grass[i] = new Engine.Plane(this);
+            }
 
             for (int i = 0; i < 17; i++)
             {
@@ -92,6 +101,13 @@ namespace MGChoplifter
             Player.LoadContent();
             Base.LoadModel(Content.Load<XnaModel>("Models/CLBaseV2"), null);
 
+            Texture2D grass = Content.Load<Texture2D>("Textures/Grass");
+
+            for (int i = 0; i < 20; i++)
+            {
+                Grass[i].Create(grass);
+            }
+
             if (ModelTest.Count < 16)
                 return;
 
@@ -136,6 +152,28 @@ namespace MGChoplifter
                 posy += 28;
             }
 
+            float startX = -84 * 5;
+            float startY = -170;
+
+            for (int i = 0; i < 20; i++)
+            {
+                Grass[i].BeginRun();
+                Grass[i].Position.Z = -100;
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                Grass[i].Position.X = startX + (i * 84);
+                Grass[i].Position.Y = startY;
+                GrassX[i] = Grass[i].Position.X;
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                Grass[i + 10].Position.X = startX + (i * 84);
+                Grass[i + 10].Position.Y = startY - 84;
+                GrassX[i + 10] = Grass[i + 10].Position.X;
+            }
         }
 
         /// <summary>
@@ -156,6 +194,13 @@ namespace MGChoplifter
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            for (int i = 0; i < 20; i++)
+            {
+                for (int n = 0; n < 2; n++)
+                {
+                    Grass[i].Position.X = GrassX[i] + S.Camera.Position.X;
+                }
+            }
 
             base.Update(gameTime);
         }

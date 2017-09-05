@@ -255,7 +255,7 @@ namespace Engine
 
         public float RandomRadian()
         {
-            return Services.RandomMinMax(0, (float)Math.PI * 2);
+            return Services.RandomMinMax(0, MathHelper.TwoPi);
         }
 
         public Vector2 SetRandomVelocity(float speed)
@@ -274,6 +274,11 @@ namespace Engine
         public Vector2 SetVelocityFromAngle(float rotation, float magnitude)
         {
             return new Vector2((float)Math.Cos(rotation) * magnitude, (float)Math.Sin(rotation) * magnitude);
+        }
+
+        public Vector3 SetVelocity3FromAngleZ(float rotationZ, float magnitude)
+        {
+            return new Vector3((float)Math.Cos(rotationZ) * magnitude, (float)Math.Sin(rotationZ) * magnitude, 0);
         }
 
         public Vector2 SetVelocityFromAngle(float magnitude)
@@ -295,7 +300,7 @@ namespace Engine
             float targetLessFacing = targetAngle - facingAngle;
             float facingLessTarget = facingAngle - targetAngle;
 
-            if (Math.Abs(targetLessFacing) > Math.PI)
+            if (Math.Abs(targetLessFacing) > MathHelper.Pi)
             {
                 if (facingAngle > targetAngle)
                 {

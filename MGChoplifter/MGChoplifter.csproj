@@ -49,6 +49,7 @@
     <Compile Include="Engine\BoundingPartList.cs" />
     <Compile Include="Engine\Camera.cs" />
     <Compile Include="Engine\MeshInfo.cs" />
+    <Compile Include="Engine\Plane.cs" />
     <Compile Include="Engine\SModel.cs" />
     <Compile Include="Engine\IBeginRun.cs" />
     <Compile Include="Engine\ICamera2D.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Engine\SpritePositionedObject.cs" />
     <Compile Include="Engine\Timer.cs" />
     <Compile Include="Entities\MountianControl.cs" />
+    <Compile Include="Entities\Shot.cs" />
     <Compile Include="Entities\ThePlayer.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />

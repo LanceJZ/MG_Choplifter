@@ -13,9 +13,9 @@ namespace Engine
     public class AModel : PositionedObject, IDrawComponent
     {
         public XnaModel xnaModel { get; private set; }
-        Texture2D xnaTexture;
-        private Matrix[] modelTransforms;
-        private Matrix baseWorld;
+        Texture2D XNATexture;
+        private Matrix[] ModelTransforms;
+        private Matrix BaseWorld;
 
         public AModel (Game game) : base(game)
         {
@@ -45,9 +45,9 @@ namespace Engine
 
             // Calculate the base transformation by combining
             // translation, rotation, and scaling
-            baseWorld = Matrix.Identity;
+            BaseWorld = Matrix.Identity;
 
-            baseWorld = Matrix.CreateScale(Scale)
+            BaseWorld = Matrix.CreateScale(Scale)
                 * Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z)
                 * Matrix.CreateTranslation(ReletivePosition)
                 * Matrix.CreateFromYawPitchRoll(ReletiveRotation.Y, ReletiveRotation.X, ReletiveRotation.Z)
@@ -56,40 +56,41 @@ namespace Engine
 
         public void Draw(GameTime gametime)
         {
-
-            if (xnaModel == null)
-                return;
-
-            foreach (ModelMesh mesh in xnaModel.Meshes)
+            if (Active)
             {
-                Matrix localWorld = modelTransforms[mesh.ParentBone.Index]
-                   * baseWorld;
+                if (xnaModel == null)
+                    return;
 
-                foreach (ModelMeshPart meshPart in mesh.MeshParts)
+                foreach (ModelMesh mesh in xnaModel.Meshes)
                 {
-                    BasicEffect effect = (BasicEffect)meshPart.Effect;
-                    effect.TextureEnabled = true;
+                    //Matrix localWorld = modelTransforms[mesh.ParentBone.Index]
+                    //   * baseWorld;
 
-                    if (xnaTexture != null)
-                        effect.Texture = xnaTexture;
+                    foreach (ModelMeshPart meshPart in mesh.MeshParts)
+                    {
+                        BasicEffect effect = (BasicEffect)meshPart.Effect;
+                        //effect.TextureEnabled = true;
 
-                    effect.EnableDefaultLighting();
-                    effect.PreferPerPixelLighting = true;
-                    effect.World = localWorld;
-                    Services.Camera.Draw(effect);
+                        if (XNATexture != null)
+                            effect.Texture = XNATexture;
+
+                        effect.EnableDefaultLighting();
+                        effect.PreferPerPixelLighting = true;
+                        effect.World = BaseWorld;
+                        Services.Camera.Draw(effect);
+                    }
+
+                    mesh.Draw();
                 }
-
-                mesh.Draw();
             }
-
         }
 
         public void LoadModel(XnaModel model, Texture2D texture)
         {
             xnaModel = model;
-            xnaTexture = texture;
-            modelTransforms = new Matrix[xnaModel.Bones.Count];
-            xnaModel.CopyAbsoluteBoneTransformsTo(modelTransforms);
+            XNATexture = texture;
+            ModelTransforms = new Matrix[xnaModel.Bones.Count];
+            xnaModel.CopyAbsoluteBoneTransformsTo(ModelTransforms);
         }
     }
 }

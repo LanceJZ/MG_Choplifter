@@ -23,6 +23,7 @@ namespace MGChoplifter.Entities
 
         Engine.AModel MainBlade;
         Engine.AModel Rotor;
+        Shot[] Shots = new Shot[5];
 
         T FireTimer;
         T TurnTimer;
@@ -38,6 +39,7 @@ namespace MGChoplifter.Entities
         float MoveHorizontal;
         int ShotLimit = 5;
         bool FacingChanged;
+        bool Coasting;
 
         Direction Facing;
 
@@ -47,6 +49,11 @@ namespace MGChoplifter.Entities
             Rotor = new Engine.AModel(game);
             FireTimer = new T(game, FireRate);
             TurnTimer = new T(game, TurnRate);
+
+            for(int i = 0; i < 5; i++)
+            {
+                Shots[i] = new Shot(game);
+            }
         }
 
         public override void Initialize()
@@ -59,6 +66,11 @@ namespace MGChoplifter.Entities
             Rotor.Initialize();
             FireTimer.Initialize();
             TurnTimer.Initialize();
+
+            for (int i = 0; i < 5; i++)
+            {
+                Shots[i].Initialize();
+            }
         }
 
         public void LoadContent()
@@ -66,6 +78,13 @@ namespace MGChoplifter.Entities
             MainBlade.LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerMainBlade"), null);
             Rotor.LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerRotor"), null);
             LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerChopper"), null);
+
+            XnaModel shotM = Game.Content.Load<XnaModel>("Models/cube");
+
+            for (int i = 0; i < 5; i++)
+            {
+                Shots[i].LoadModel(shotM);
+            }
         }
 
         public override void BeginRun()
@@ -83,6 +102,11 @@ namespace MGChoplifter.Entities
             Children[0].RotationVelocity = new Vector3(0, 10, 0);
             Children[1].RotationVelocity = new Vector3(0, 0, 16);
 
+            for (int i = 0; i < 5; i++)
+            {
+                Shots[i].BeginRun();
+                Shots[i].Active = false;
+            }
         }
 
         public override void Update(GameTime gameTime)
@@ -102,6 +126,10 @@ namespace MGChoplifter.Entities
 
             if (FacingChanged)
                 UpdateFacing();
+
+            if (Coasting)
+                WindResistance();
+
         }
 
         void GetInput()
@@ -131,6 +159,7 @@ namespace MGChoplifter.Entities
             //+		Position	62.65797  -126.4613  0	Microsoft.Xna.Framework.Vector3
             Acceleration = Vector3.Zero;
             MoveHorizontal = 0;
+            Coasting = true;
 
             if (KeyState.IsKeyDown(Keys.Left))
             {
@@ -140,6 +169,7 @@ namespace MGChoplifter.Entities
                     MoveHorizontal = 1;
                     MoveX(new Vector3(-AccelerationAmount, 0, 0));
                     CheckPositionX();
+                    Coasting = false;
                 }
                 else
                 {
@@ -154,6 +184,7 @@ namespace MGChoplifter.Entities
                     MoveHorizontal = -1;
                     MoveX(new Vector3(AccelerationAmount, 0, 0));
                     CheckPositionX();
+                    Coasting = false;
                 }
                 else
                 {
@@ -166,9 +197,10 @@ namespace MGChoplifter.Entities
 
                 if (Position.Y < 200)
                 {
-                    MoveY(new Vector3(0, AccelerationAmount * 0.1f, 0));
+                    MoveY(new Vector3(0, AccelerationAmount * 0.2f, 0));
 
                     CheckPositionY();
+                    Coasting = false;
                 }
                 else
                 {
@@ -180,9 +212,10 @@ namespace MGChoplifter.Entities
 
                 if (Position.Y > -126.5f)
                 {
-                    MoveY(new Vector3(0, -AccelerationAmount * 0.25f, 0));
+                    MoveY(new Vector3(0, -AccelerationAmount * 0.4f, 0));
 
                     CheckPositionY();
+                    Coasting = false;
                 }
                 else
                 {
@@ -195,7 +228,27 @@ namespace MGChoplifter.Entities
 
         void FireShot()
         {
+            for (int i = 0; i < 5; i++)
+            {
+                if (!Shots[i].Active)
+                {
+                    float rot = Rotation.Z - MathHelper.Pi;
 
+                    if (rot < 0)
+                        rot += MathHelper.TwoPi;
+
+
+                    Shots[i].Spawn(Position + new Vector3(-20, -5, 0), SetVelocityFromAngle(rot, 200f - Velocity.X));
+
+                    break;
+                }
+            }
+        }
+
+        void WindResistance()
+        {
+            float Deceration = 1.15f;
+            Acceleration = -Velocity * Deceration;
         }
 
         void StopMovementX()
@@ -224,54 +277,59 @@ namespace MGChoplifter.Entities
         {
             Velocity.X = MathHelper.Clamp(Velocity.X, -100, 100);
             Acceleration = direction;
+            float Deceration = 1.1f;
+            Acceleration.Y = -Velocity.Y * Deceration;
         }
 
         void MoveY(Vector3 direction)
         {
             Velocity.Y = MathHelper.Clamp(Velocity.Y, -60, 60);
-
             Acceleration = direction;
+            float Deceration = 1.1f;
+            Acceleration.X = -Velocity.X * Deceration;
         }
 
         void TeltChopper()
         {
+            float comp = 0.002f;
+
             switch (Facing)
             {
                 case Direction.Right:
                     ChangeXTilt();
 
-                    if (Rotation.Z > ((MoveHorizontal * -Tilt) + (Velocity.X * 0.005f)))
+                    if (Rotation.Z > ((MoveHorizontal * -Tilt) + (Velocity.X * comp)))
                     {
                         RotationVelocity.Z = -RotateRate * 0.25f;
                     }
                     else
                     {
-                        Rotation.Z = (MoveHorizontal * -Tilt) + (Velocity.X * 0.005f);
+                        Rotation.Z = (MoveHorizontal * -Tilt) + (Velocity.X * comp);
                     }
                     break;
 
                 case Direction.Left:
                     ChangeXTilt();
 
-                    if (Rotation.Z < (MoveHorizontal * Tilt) - (Velocity.X * 0.005f))
+                    if (Rotation.Z < (MoveHorizontal * Tilt) - (Velocity.X * comp))
                     {
                         RotationVelocity.Z = RotateRate * 0.25f;
                     }
                     else
                     {
-                        Rotation.Z = (MoveHorizontal * Tilt) - (Velocity.X * 0.005f);
+                        Rotation.Z = (MoveHorizontal * Tilt) - (Velocity.X * comp);
                     }
                     break;
 
                 case Direction.ForwardFromRight:
                 case Direction.ForwardFromLeft:
-                    if (Rotation.X > (MoveHorizontal * -Tilt) + (Velocity.X * 0.005f))
+                    if (Rotation.X > (MoveHorizontal * -Tilt) + (Velocity.X * comp))
                     {
                         RotationVelocity.X = -RotateRate * 0.25f;
                     }
                     else
                     {
-                        Rotation.X = (MoveHorizontal * -Tilt) + (Velocity.X * 0.005f);
+                        Rotation.X = (MoveHorizontal * -Tilt) + (Velocity.X * comp);
                     }
 
                     RotationVelocity.Z = 0;
