@@ -20,14 +20,16 @@ namespace MGChoplifter
         List<Engine.AModel> ModelTest = new List<Engine.AModel>();
 
         Entities.ThePlayer Player;
-        Entities.MountianControl Mountians;
-        Engine.AModel Base;
-
-        Engine.Plane[] Grass = new Engine.Plane[20];
-        float[] GrassX = new float[20];
+        Entities.HouseControl Houses;
+        Entities.Background Background;
 
         public Game1()
         {
+            for (int i = 0; i < 17; i++)
+            {
+                //ModelTest.Add(new Engine.AModel(this));
+            }
+
             GraphicsDM = new GraphicsDeviceManager(this);
             GraphicsDM.IsFullScreen = false;
             GraphicsDM.SynchronizeWithVerticalRetrace = true;
@@ -41,19 +43,10 @@ namespace MGChoplifter
             IsFixedTimeStep = false;
             Content.RootDirectory = "Content";
 
-            for (int i = 0; i < 20; i++)
-            {
-                Grass[i] = new Engine.Plane(this);
-            }
-
-            for (int i = 0; i < 17; i++)
-            {
-                //ModelTest.Add(new Engine.AModel(this));
-            }
-
             Player = new Entities.ThePlayer(this);
-            Mountians = new Entities.MountianControl(this);
-            Base = new Engine.AModel(this);
+            Houses = new Entities.HouseControl(this);
+            Background = new Entities.Background(this);
+
         }
 
         private void SetMultiSampling(object sender, PreparingDeviceSettingsEventArgs eventArgs)
@@ -78,15 +71,6 @@ namespace MGChoplifter
             S.SpecularColor = new Vector3(0, 0, 0.5f);
             S.AmbientLightColor = new Vector3(0.25f, 0.25f, 0.25f); // Add some overall ambient light.
 
-            Player.Initialize();
-            Mountians.Initialize();
-            Base.Initialize();
-
-            foreach (Engine.AModel mod in ModelTest)
-            {
-                mod.Initialize();
-            }
-
             base.Initialize();
         }
 
@@ -99,14 +83,8 @@ namespace MGChoplifter
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Player.LoadContent();
-            Base.LoadModel(Content.Load<XnaModel>("Models/CLBaseV2"), null);
-
-            Texture2D grass = Content.Load<Texture2D>("Textures/Grass");
-
-            for (int i = 0; i < 20; i++)
-            {
-                Grass[i].Create(grass);
-            }
+            Houses.LoadContent();
+            Background.LoadContent();
 
             if (ModelTest.Count < 16)
                 return;
@@ -133,18 +111,13 @@ namespace MGChoplifter
         protected override void BeginRun()
         {
             base.BeginRun();
-
-            Player.BeginRun();
-            Base.BeginRun();
-
-            Base.Position = new Vector3(100, -145, 0);
+            S.BeginRun();
 
             float posx = 0;
             float posy = 0;
 
             foreach (Engine.AModel mod in ModelTest)
             {
-                mod.BeginRun();
                 mod.RotationVelocity = new Vector3(0, 0.5f, 0);
                 mod.Position = new Vector3(-360 + posx, -230 + posy, 0);
 
@@ -152,28 +125,6 @@ namespace MGChoplifter
                 posy += 28;
             }
 
-            float startX = -84 * 5;
-            float startY = -170;
-
-            for (int i = 0; i < 20; i++)
-            {
-                Grass[i].BeginRun();
-                Grass[i].Position.Z = -100;
-            }
-
-            for (int i = 0; i < 10; i++)
-            {
-                Grass[i].Position.X = startX + (i * 84);
-                Grass[i].Position.Y = startY;
-                GrassX[i] = Grass[i].Position.X;
-            }
-
-            for (int i = 0; i < 10; i++)
-            {
-                Grass[i + 10].Position.X = startX + (i * 84);
-                Grass[i + 10].Position.Y = startY - 84;
-                GrassX[i + 10] = Grass[i + 10].Position.X;
-            }
         }
 
         /// <summary>
@@ -193,14 +144,6 @@ namespace MGChoplifter
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            for (int i = 0; i < 20; i++)
-            {
-                for (int n = 0; n < 2; n++)
-                {
-                    Grass[i].Position.X = GrassX[i] + S.Camera.Position.X;
-                }
-            }
 
             base.Update(gameTime);
         }

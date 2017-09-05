@@ -12,16 +12,18 @@ namespace MGChoplifter.Entities
 
     public class MountianControl : GameComponent, Engine.IBeginable, Engine.IUpdateableComponent
     {
-        float SpaceBetween = -568f;
-        float StartX = 283f;
-        float Height = -133f;
-        float Depth = -100;
+        float SpaceBetween = -830f;
+        float StartX = 443f;
+        float Height = -225f;
+        float Depth = -150;
 
         PO[] MountianPOs = new PO[8];
-        Vector3[] MountianStartPos = new Vector3[8];
+        Vector3[] MountianStartPos;
 
         public MountianControl(Game game) : base(game)
         {
+            MountianStartPos = new Vector3[MountianPOs.Length];
+
             for (int i = 0; i < MountianPOs.Length; i++)
             {
                 MountianPOs[i] = new Engine.AModel(game, game.Content.Load<XnaModel>("Models/Mountain"), null);
@@ -34,14 +36,14 @@ namespace MGChoplifter.Entities
 
         public override void Initialize()
         {
-            foreach(PO po in MountianPOs)
-            {
-                po.Initialize();
-            }
+            base.Initialize();
+
+            S.AddBeginable(this);
         }
 
         public void BeginRun()
         {
+
         }
 
         public override void Update(GameTime gameTime)

@@ -31,12 +31,17 @@ namespace MGChoplifter.Entities
         KeyboardState KeyState;
         KeyboardState KeyStateOld;
 
-        float AccelerationAmount = 120;
+        float AccelerationAmount = 220;
+        float MaxSpeed = 350;
         float Tilt = MathHelper.PiOver4 / 10f;
         float FireRate = 0.1f;
         float TurnRate = 1.1f;
         float RotateRate = MathHelper.PiOver2;
         float MoveHorizontal;
+        float BoundLowY = -219.5f;
+        float BoundHighY = 364.25f;
+        float BoundRightX = 145.5f;
+        float BoundLeftX = -6600 * 2;
         int ShotLimit = 5;
         bool FacingChanged;
         bool Coasting;
@@ -50,7 +55,7 @@ namespace MGChoplifter.Entities
             FireTimer = new T(game, FireRate);
             TurnTimer = new T(game, TurnRate);
 
-            for(int i = 0; i < 5; i++)
+            for(int i = 0; i < ShotLimit; i++)
             {
                 Shots[i] = new Shot(game);
             }
@@ -62,15 +67,6 @@ namespace MGChoplifter.Entities
 
             Facing = Direction.Left;
 
-            MainBlade.Initialize();
-            Rotor.Initialize();
-            FireTimer.Initialize();
-            TurnTimer.Initialize();
-
-            for (int i = 0; i < 5; i++)
-            {
-                Shots[i].Initialize();
-            }
         }
 
         public void LoadContent()
@@ -81,7 +77,7 @@ namespace MGChoplifter.Entities
 
             XnaModel shotM = Game.Content.Load<XnaModel>("Models/cube");
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < ShotLimit; i++)
             {
                 Shots[i].LoadModel(shotM);
             }
@@ -91,9 +87,6 @@ namespace MGChoplifter.Entities
         {
             base.BeginRun();
 
-            MainBlade.BeginRun();
-            Rotor.BeginRun();
-
             AddChild(MainBlade, true, true);
             AddChild(Rotor, true, true);
 
@@ -102,9 +95,8 @@ namespace MGChoplifter.Entities
             Children[0].RotationVelocity = new Vector3(0, 10, 0);
             Children[1].RotationVelocity = new Vector3(0, 0, 16);
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < ShotLimit; i++)
             {
-                Shots[i].BeginRun();
                 Shots[i].Active = false;
             }
         }
@@ -113,12 +105,12 @@ namespace MGChoplifter.Entities
         {
             base.Update(gameTime);
 
-            Engine.Services.Camera.Position.X = Position.X;
+            S.Camera.Position.X = Position.X;
 
             GetInput();
             TeltChopper();
 
-            if (Position.X < -7900 || Position.X > 62.666 || Position.Y > 200 || Position.Y < -126.5f)
+            if (Position.X < BoundLeftX || Position.X > BoundRightX || Position.Y > BoundHighY || Position.Y < BoundLowY)
             {
                 StopMovementX();
                 StopMovementY();
@@ -164,7 +156,7 @@ namespace MGChoplifter.Entities
             if (KeyState.IsKeyDown(Keys.Left))
             {
 
-                if (Position.X > -7900)
+                if (Position.X > BoundLeftX)
                 {
                     MoveHorizontal = 1;
                     MoveX(new Vector3(-AccelerationAmount, 0, 0));
@@ -179,7 +171,7 @@ namespace MGChoplifter.Entities
             else if (KeyState.IsKeyDown(Keys.Right))
             {
 
-                if (Position.X < 62.666f)
+                if (Position.X < BoundRightX)
                 {
                     MoveHorizontal = -1;
                     MoveX(new Vector3(AccelerationAmount, 0, 0));
@@ -195,7 +187,7 @@ namespace MGChoplifter.Entities
             if (KeyState.IsKeyDown(Keys.Up))
             {
 
-                if (Position.Y < 200)
+                if (Position.Y < BoundHighY)
                 {
                     MoveY(new Vector3(0, AccelerationAmount * 0.2f, 0));
 
@@ -210,7 +202,7 @@ namespace MGChoplifter.Entities
             else if (KeyState.IsKeyDown(Keys.Down))
             {
 
-                if (Position.Y > -126.5f)
+                if (Position.Y > BoundLowY)
                 {
                     MoveY(new Vector3(0, -AccelerationAmount * 0.4f, 0));
 
@@ -265,17 +257,17 @@ namespace MGChoplifter.Entities
 
         void CheckPositionX()
         {
-            Position.X = MathHelper.Clamp(Position.X, -7900, 62.66f);
+            Position.X = MathHelper.Clamp(Position.X, BoundLeftX, BoundRightX);
         }
 
         void CheckPositionY()
         {
-            Position.Y = MathHelper.Clamp(Position.Y, -126.5f, 200);
+            Position.Y = MathHelper.Clamp(Position.Y, BoundLowY, BoundHighY);
         }
 
         void MoveX(Vector3 direction)
         {
-            Velocity.X = MathHelper.Clamp(Velocity.X, -100, 100);
+            Velocity.X = MathHelper.Clamp(Velocity.X, -MaxSpeed, MaxSpeed);
             Acceleration = direction;
             float Deceration = 1.1f;
             Acceleration.Y = -Velocity.Y * Deceration;
@@ -283,7 +275,7 @@ namespace MGChoplifter.Entities
 
         void MoveY(Vector3 direction)
         {
-            Velocity.Y = MathHelper.Clamp(Velocity.Y, -60, 60);
+            Velocity.Y = MathHelper.Clamp(Velocity.Y, -MaxSpeed * 0.5f, MaxSpeed * 0.33f);
             Acceleration = direction;
             float Deceration = 1.1f;
             Acceleration.X = -Velocity.X * Deceration;
@@ -345,6 +337,8 @@ namespace MGChoplifter.Entities
 
                     break;
             }
+
+            Rotation.Z = MathHelper.Clamp(Rotation.Z, -MathHelper.PiOver4 * 0.5f, MathHelper.PiOver4 * 0.5f);
         }
 
         void ChangeXTilt()

@@ -39,6 +39,12 @@ namespace Engine
             Services.GraphicsDM.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         }
 
+        public override void BeginRun()
+        {
+            base.BeginRun();
+
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
