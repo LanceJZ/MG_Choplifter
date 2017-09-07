@@ -65,7 +65,7 @@ namespace MGChoplifter.Entities
         {
             base.Initialize();
 
-            Facing = Direction.Left;
+            Facing = Direction.Right;
 
         }
 
@@ -87,13 +87,13 @@ namespace MGChoplifter.Entities
         {
             base.BeginRun();
 
-            AddChild(MainBlade, true, true);
-            AddChild(Rotor, true, true);
+            MainBlade.AddAsChild(this, true, false);
+            Rotor.AddAsChild(this, true, false);
 
-            Children[0].ReletivePosition = new Vector3(0, 12f, 0);
-            Children[1].ReletivePosition = new Vector3(25, 8f, 0);
-            Children[0].RotationVelocity = new Vector3(0, 10, 0);
-            Children[1].RotationVelocity = new Vector3(0, 0, 16);
+            MainBlade.Position = new Vector3(0, 12f, 0);
+            MainBlade.RotationVelocity = new Vector3(0, 10, 0);
+            Rotor.Position = new Vector3(-26, 8f, 0);
+            Rotor.RotationVelocity = new Vector3(0, 0, 16);
 
             for (int i = 0; i < ShotLimit; i++)
             {
@@ -224,13 +224,32 @@ namespace MGChoplifter.Entities
             {
                 if (!Shots[i].Active)
                 {
-                    float rot = Rotation.Z - MathHelper.Pi;
+                    Vector3 pos = Position;
+                    Vector2 vel = Vector2.Zero;
 
-                    if (rot < 0)
-                        rot += MathHelper.TwoPi;
+                    switch (Facing)
+                    {
+                        case Direction.Right:
+                            vel = SetVelocityFromAngle(MathHelper.Clamp(Rotation.Z, -MathHelper.PiOver4,
+                                MathHelper.PiOver4), Velocity.X + 400);
+                            pos.X += 20;
+                            break;
 
+                        case Direction.Left:
+                            vel = SetVelocityFromAngle(MathHelper.Clamp(-Rotation.Z, -MathHelper.PiOver4,
+                                MathHelper.PiOver4), Velocity.X - 400);
+                            pos.X -= 20;
+                            break;
 
-                    Shots[i].Spawn(Position + new Vector3(-20, -5, 0), SetVelocityFromAngle(rot, 200f - Velocity.X));
+                        case Direction.ForwardFromRight:
+                        case Direction.ForwardFromLeft:
+                            vel.Y = -200;
+                            pos.Y -= 20;
+                            break;
+                    }
+
+                    Shots[i].Spawn(pos, vel);
+
 
                     break;
                 }
@@ -287,7 +306,7 @@ namespace MGChoplifter.Entities
 
             switch (Facing)
             {
-                case Direction.Right:
+                case Direction.Left:
                     ChangeXTilt();
 
                     if (Rotation.Z > ((MoveHorizontal * -Tilt) + (Velocity.X * comp)))
@@ -300,7 +319,7 @@ namespace MGChoplifter.Entities
                     }
                     break;
 
-                case Direction.Left:
+                case Direction.Right:
                     ChangeXTilt();
 
                     if (Rotation.Z < (MoveHorizontal * Tilt) - (Velocity.X * comp))
@@ -384,7 +403,7 @@ namespace MGChoplifter.Entities
             switch (Facing)
             {
                 case Direction.ForwardFromRight:
-                    if (Rotation.Y > MathHelper.PiOver2)
+                    if (Rotation.Y > -MathHelper.PiOver2)
                     {
                         RotationVelocity.Y = -RotateRate;
                     }
@@ -396,7 +415,7 @@ namespace MGChoplifter.Entities
                     break;
 
                 case Direction.ForwardFromLeft:
-                    if (Rotation.Y < MathHelper.PiOver2)
+                    if (Rotation.Y < -MathHelper.PiOver2)
                     {
                         RotationVelocity.Y = RotateRate;
                     }
@@ -408,25 +427,25 @@ namespace MGChoplifter.Entities
                     break;
 
                 case Direction.Right:
-                    if (Rotation.Y < Math.PI)
+                    if (Rotation.Y < -0.05)
                     {
                         RotationVelocity.Y = RotateRate;
                     }
                     else
                     {
+                        Rotation.Y = 0;
                         RotationVelocity.Y = 0;
                         FacingChanged = false;
                     }
                     break;
 
                 case Direction.Left:
-                    if (Rotation.Y > 0.05f)
+                    if (Rotation.Y > -MathHelper.Pi)
                     {
                         RotationVelocity.Y = -RotateRate;
                     }
                     else
                     {
-                        Rotation.Y = 0;
                         RotationVelocity.Y = 0;
                         FacingChanged = false;
                     }

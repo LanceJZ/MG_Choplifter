@@ -1,5 +1,6 @@
 ﻿#region Using
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,7 +14,7 @@ namespace Engine
 		private float m_ElapsedGameTime;
 		// Doing these as fields is almost twice as fast as if they were properties.
 		// Also, sense XYZ are fields they do not get data binned as a property.
-		public List<PositionedObject> Children;
+		public PositionedObject ParentPO;
 		public Vector3 Position = Vector3.Zero;
 		public Vector3 Acceleration = Vector3.Zero;
 		public Vector3 Velocity = Vector3.Zero;
@@ -97,7 +98,7 @@ namespace Engine
 		public PositionedObject(Game game) : base(game)
 		{
 			game.Components.Add(this);
-			Children = new List<PositionedObject>();
+
 		}
 		#endregion
 		#region Public Methods
@@ -140,34 +141,21 @@ namespace Engine
     //                Rotation.Z = MathHelper.TwoPi;
             }
 
-            if (m_Parent)
+            if (m_Child)
 			{
-				foreach (PositionedObject child in Children)
-				{
-					if (Active)
-					{
-						if (child.DirectConnection)
-						{
-							child.Position = Position;
-                            child.ReletiveRotation = Rotation;
-							child.Scale = Scale;
-						}
-						else
-						{
-                            child.Position = Vector3.Transform(child.ReletivePosition,
-                                Matrix.CreateRotationX(Rotation.X));
-                            child.Position = Vector3.Transform(child.ReletivePosition,
-                                Matrix.CreateRotationY(Rotation.Y));
-                            child.Position = Vector3.Transform(child.ReletivePosition,
-                                Matrix.CreateRotationZ(Rotation.Z));
-                            child.Position += Position;
-                            child.Rotation = Rotation + child.ReletiveRotation;
-                        }
-					}
+                if (DirectConnection)
+                {
+                    Position = ParentPO.Position;
+                    Rotation = ParentPO.Rotation;
+                }
+                else
+                {
+                    ReletivePosition = ParentPO.Position;
+                    ReletiveRotation = ParentPO.Rotation;
+                }
 
-					if (child.ActiveDependent)
-						child.Active = Active;
-				}
+				if (ActiveDependent)
+					ParentPO.Active = Active;
 			}
 		}
 
@@ -184,18 +172,18 @@ namespace Engine
 
 		}
         /// <summary>
-        /// Add PO class or base PO class from Sprite as child of this class.
+        /// Add PO class or base PO class from AModel or Sprite as child of this class.
         /// </summary>
-        /// <param name="child">The child to this class.</param>
+        /// <param name="Parent">The parent to this class.</param>
         /// <param name="activeDependent">Bind Active to child.</param>
         /// <param name="directConnection">Bind Position and Rotation to child.</param>
-		public virtual void AddChild(PositionedObject child, bool activeDependent, bool directConnection)
+		public virtual void AddAsChild(PositionedObject Parent, bool activeDependent, bool directConnection)
 		{
-			Children.Add(child);
-			Children[Children.Count - 1].ActiveDependent = activeDependent;
-			Children[Children.Count - 1].DirectConnection = directConnection;
-            Children[Children.Count - 1].Child = true;
-            m_Parent = true;
+            ActiveDependent = activeDependent;
+            DirectConnection = directConnection;
+            Child = true;
+            ParentPO = Parent;
+            ParentPO.Parent = true;
 		}
         /// <summary>
         /// AABB collusion detection.

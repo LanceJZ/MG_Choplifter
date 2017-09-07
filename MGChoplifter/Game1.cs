@@ -19,6 +19,8 @@ namespace MGChoplifter
 
         List<Engine.AModel> ModelTest = new List<Engine.AModel>();
 
+        Entities.Tank Tank;
+
         Entities.ThePlayer Player;
         Entities.HouseControl Houses;
         Entities.Background Background;
@@ -43,6 +45,8 @@ namespace MGChoplifter
             IsFixedTimeStep = false;
             Content.RootDirectory = "Content";
 
+            Tank = new Entities.Tank(this);
+
             Player = new Entities.ThePlayer(this);
             Houses = new Entities.HouseControl(this);
             Background = new Entities.Background(this);
@@ -63,7 +67,12 @@ namespace MGChoplifter
         /// </summary>
         protected override void Initialize()
         {
-            // Positive Y is Up. Positive X is Right. Y 240 is top of window, Height / 3.75. X 400 is the Right side, Width / 3.
+            Tank.Position.Y = -240;
+            Tank.Position.X = -200;
+
+            Tank.RotationVelocity.Y = 1;
+
+            // Positive Y is Up. Positive X is Right.
             S.Initialize(GraphicsDM, this, new Vector3(0, 0, 200), 0, 1000);
 
             S.DefuseLight = new Vector3(0.6f, 0.5f, 0.7f);
@@ -81,6 +90,8 @@ namespace MGChoplifter
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            Tank.LoadContent();
 
             Player.LoadContent();
             Houses.LoadContent();
@@ -105,7 +116,6 @@ namespace MGChoplifter
             ModelTest[13].LoadModel(Content.Load<XnaModel>("Models/CLTankTred2"), null);
             ModelTest[14].LoadModel(Content.Load<XnaModel>("Models/CLTankTurret"), null);
             ModelTest[15].LoadModel(Content.Load<XnaModel>("Models/Mountain"), null);
-            ModelTest[16].LoadModel(Content.Load<XnaModel>("Models/TankTredAnimate"), null);
         }
 
         protected override void BeginRun()
