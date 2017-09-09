@@ -49,8 +49,8 @@ namespace Engine
 
             BaseWorld = Matrix.CreateScale(Scale)
                 * Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z + -MathHelper.PiOver2)
-                * Matrix.CreateTranslation(ReletivePosition)
-                * Matrix.CreateFromYawPitchRoll(ReletiveRotation.Y, ReletiveRotation.X, ReletiveRotation.Z)
+                * Matrix.CreateTranslation(ParentPosition)
+                * Matrix.CreateFromYawPitchRoll(ParentRotation.Y, ParentRotation.X, ParentRotation.Z)
                 * Matrix.CreateTranslation(Position);
 
             // Set object and camera info

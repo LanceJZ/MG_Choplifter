@@ -8,6 +8,7 @@ namespace MGChoplifter
 {
     using PO = Engine.PositionedObject;
     using S = Engine.Services;
+    using E = Entities;
 
     /// <summary>
     /// This is the main type for your game.
@@ -17,13 +18,14 @@ namespace MGChoplifter
         GraphicsDeviceManager GraphicsDM;
         SpriteBatch spriteBatch;
 
+        Engine.AModel cubeTest;
+
         List<Engine.AModel> ModelTest = new List<Engine.AModel>();
 
-        Entities.Tank Tank;
-
-        Entities.ThePlayer Player;
-        Entities.HouseControl Houses;
-        Entities.Background Background;
+        E.ThePlayer Player;
+        E.HouseControl Houses;
+        E.Background Background;
+        E.EnemyControl Enemies;
 
         public Game1()
         {
@@ -31,6 +33,8 @@ namespace MGChoplifter
             {
                 //ModelTest.Add(new Engine.AModel(this));
             }
+
+            cubeTest = new Engine.AModel(this);
 
             GraphicsDM = new GraphicsDeviceManager(this);
             GraphicsDM.IsFullScreen = false;
@@ -45,12 +49,10 @@ namespace MGChoplifter
             IsFixedTimeStep = false;
             Content.RootDirectory = "Content";
 
-            Tank = new Entities.Tank(this);
-
-            Player = new Entities.ThePlayer(this);
-            Houses = new Entities.HouseControl(this);
-            Background = new Entities.Background(this);
-
+            Player = new E.ThePlayer(this);
+            Houses = new E.HouseControl(this);
+            Background = new E.Background(this, Player);
+            Enemies = new E.EnemyControl(this, Player);
         }
 
         private void SetMultiSampling(object sender, PreparingDeviceSettingsEventArgs eventArgs)
@@ -67,17 +69,12 @@ namespace MGChoplifter
         /// </summary>
         protected override void Initialize()
         {
-            Tank.Position.Y = -240;
-            Tank.Position.X = -200;
-
-            Tank.RotationVelocity.Y = 1;
-
             // Positive Y is Up. Positive X is Right.
             S.Initialize(GraphicsDM, this, new Vector3(0, 0, 200), 0, 1000);
-
+            // Setup lighting.
             S.DefuseLight = new Vector3(0.6f, 0.5f, 0.7f);
-            S.LightDirection = new Vector3(-0.95f, -0.95f, -0.5f);
-            S.SpecularColor = new Vector3(0, 0, 0.5f);
+            S.LightDirection = new Vector3(-0.75f, -0.75f, -0.5f);
+            S.SpecularColor = new Vector3(0.1f, 0, 0.5f);
             S.AmbientLightColor = new Vector3(0.25f, 0.25f, 0.25f); // Add some overall ambient light.
 
             base.Initialize();
@@ -89,13 +86,9 @@ namespace MGChoplifter
         /// </summary>
         protected override void LoadContent()
         {
+            //cubeTest.LoadModel(Content.Load<XnaModel>("Models/Cube"), null);
+
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            Tank.LoadContent();
-
-            Player.LoadContent();
-            Houses.LoadContent();
-            Background.LoadContent();
 
             if (ModelTest.Count < 16)
                 return;
@@ -121,6 +114,9 @@ namespace MGChoplifter
         protected override void BeginRun()
         {
             base.BeginRun();
+
+            cubeTest.Scale = 10;
+
             S.BeginRun();
 
             float posx = 0;

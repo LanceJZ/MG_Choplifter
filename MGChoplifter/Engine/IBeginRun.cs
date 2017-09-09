@@ -1,5 +1,4 @@
-﻿
-namespace Engine
+﻿namespace Engine
 {
     public interface IBeginable
     {

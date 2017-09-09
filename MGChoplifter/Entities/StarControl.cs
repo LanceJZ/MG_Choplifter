@@ -10,7 +10,7 @@ namespace MGChoplifter.Entities
     using T = Engine.Timer;
     using PO = Engine.PositionedObject;
 
-    public class StarControl : GameComponent, Engine.IBeginable, Engine.IUpdateableComponent
+    public class StarControl : GameComponent, Engine.IBeginable, Engine.IUpdateableComponent, Engine.ILoadContent
     {
         Engine.AModel[] Stars = new Engine.AModel[50];
         float[] StarsX;
@@ -18,11 +18,6 @@ namespace MGChoplifter.Entities
         public StarControl(Game game) : base(game)
         {
             StarsX = new float[Stars.Length];
-
-            for (int i = 0; i < Stars.Length; i++)
-            {
-                Stars[i] = new Engine.AModel(game, Game.Content.Load<XnaModel>("Models/cube"), null);
-            }
 
             game.Components.Add(this);
         }
@@ -33,6 +28,11 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < Stars.Length; i++)
             {
+                Stars[i] = new Engine.AModel(Game);
+            }
+
+            for (int i = 0; i < Stars.Length; i++)
+            {
                 Stars[i].Position = new Vector3(S.RandomMinMax(-600, 600), S.RandomMinMax(-200, 400), -300);
                 StarsX[i] = Stars[i].Position.X;
                 Stars[i].RotationVelocity = new Vector3(S.RandomMinMax(-10, 10), S.RandomMinMax(-10, 10),
@@ -40,6 +40,15 @@ namespace MGChoplifter.Entities
             }
 
             S.AddBeginable(this);
+            S.AddLoadable(this);
+        }
+
+        public void LoadContent()
+        {
+            for (int i = 0; i < Stars.Length; i++)
+            {
+                Stars[i].LoadModel(Game.Content.Load<XnaModel>("Models/cube"), null);
+            }
         }
 
         public void BeginRun()

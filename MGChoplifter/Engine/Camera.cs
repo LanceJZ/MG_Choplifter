@@ -44,7 +44,7 @@ namespace Engine
             if (Orthographic)
             {
                 Projection = Matrix.CreateOrthographic(Game.Window.ClientBounds.Width * 1.5f,
-                    Game.Window.ClientBounds.Height * 1.583f, near, far);
+                    Game.Window.ClientBounds.Height * 1.875f, near, far);
             }
             else
             {

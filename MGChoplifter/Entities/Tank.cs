@@ -13,14 +13,19 @@ namespace MGChoplifter.Entities
 
     public class Tank : Engine.AModel
     {
+        public ThePlayer PlayerRef;
         TankTurret Turret;
         Engine.AModel[] TredAnimationsL = new Engine.AModel[2];
         Engine.AModel[] TredAnimationsR = new Engine.AModel[2];
         T AnimationTimer;
 
-        public Tank(Game game) : base(game)
+        float MaxSpeed = 70;
+        bool Moving;
+
+        public Tank(Game game, ThePlayer player) : base(game)
         {
-            Turret = new TankTurret(game);
+            Turret = new TankTurret(game, player);
+            PlayerRef = player;
 
             for (int i = 0; i < 2; i++)
             {
@@ -48,7 +53,7 @@ namespace MGChoplifter.Entities
             Turret.AddAsChild(this, true, false);
         }
 
-        public void LoadContent()
+        public override void LoadContent()
         {
             LoadModel(Game.Content.Load<XnaModel>("Models/CLTankBody"), null);
             Turret.LoadContent();
@@ -72,7 +77,7 @@ namespace MGChoplifter.Entities
         {
             base.Update(gameTime);
 
-            if (AnimationTimer.Expired)
+            if (AnimationTimer.Expired && Moving)
             {
                 AnimationTimer.Reset();
 
@@ -81,6 +86,25 @@ namespace MGChoplifter.Entities
                     TredAnimationsL[i].Visable = !TredAnimationsL[i].Visable;
                     TredAnimationsR[i].Visable = !TredAnimationsL[i].Visable;
                 }
+            }
+
+            Moving = false;
+            Velocity.X = 0;
+            float differnceX = PlayerRef.Position.X - Position.X;
+            float seperation = 150;
+
+
+
+            if (differnceX > seperation && PlayerRef.Position.X < -800)
+            {
+                Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
+                Moving = true;
+            }
+
+            if (differnceX < -seperation && PlayerRef.Position.X > PlayerRef.BoundLeftX)
+            {
+                Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
+                Moving = true;
             }
         }
     }

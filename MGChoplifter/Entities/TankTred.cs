@@ -16,6 +16,8 @@ namespace MGChoplifter.Entities
         Engine.AModel[] TredAnimations = new Engine.AModel[2];
         T AnimationTimer;
 
+        public bool Moving;
+
         public TankTred(Game game) : base(game)
         {
             for (int i = 0; i < 2; i++)
@@ -33,7 +35,7 @@ namespace MGChoplifter.Entities
 
         }
 
-        public void LoadContent()
+        public override void LoadContent()
         {
             TredAnimations[0].LoadModel(Game.Content.Load<XnaModel>("Models/CLTankTred1"), null);
             TredAnimations[1].LoadModel(Game.Content.Load<XnaModel>("Models/CLTankTred2"), null);
@@ -51,7 +53,7 @@ namespace MGChoplifter.Entities
         {
             base.Update(gameTime);
 
-            if (AnimationTimer.Expired)
+            if (AnimationTimer.Expired && Moving)
             {
                 for(int i = 0; i < 2; i++)
                 {

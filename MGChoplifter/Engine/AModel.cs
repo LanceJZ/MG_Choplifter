@@ -10,7 +10,7 @@ using XNAModel = Microsoft.Xna.Framework.Graphics.Model;
 
 namespace Engine
 {
-    public class AModel : PositionedObject, IDrawComponent
+    public class AModel : PositionedObject, IDrawComponent, ILoadContent
     {
         public XNAModel xnaModel { get; private set; }
         public bool Visable { get => m_Visable; set => m_Visable = value; }
@@ -35,6 +35,7 @@ namespace Engine
             base.Initialize();
             Enabled = true;
             Services.AddDrawableComponent(this);
+            Services.AddLoadable(this);
 
             Services.GraphicsDM.GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             Services.GraphicsDM.GraphicsDevice.SamplerStates[0] = SamplerState.AnisotropicWrap;
@@ -74,10 +75,10 @@ namespace Engine
 
             if (Child)
             {
-                    BaseWorld *= Matrix.CreateFromYawPitchRoll(ParentPO.Rotation.Y + ParentPO.ReletiveRotation.Y,
-                        ParentPO.Rotation.X + ParentPO.ReletiveRotation.X,
-                        ParentPO.Rotation.Z + ParentPO.ReletiveRotation.Z)
-                    * Matrix.CreateTranslation(ParentPO.Position + ParentPO.ReletivePosition);
+                    BaseWorld *= Matrix.CreateFromYawPitchRoll(ParentPO.Rotation.Y + ParentPO.ParentRotation.Y,
+                        ParentPO.Rotation.X + ParentPO.ParentRotation.X,
+                        ParentPO.Rotation.Z + ParentPO.ParentRotation.Z)
+                    * Matrix.CreateTranslation(ParentPO.Position + ParentPO.ParentPosition);
             }
         }
 
@@ -118,6 +119,11 @@ namespace Engine
             XNATexture = texture;
             ModelTransforms = new Matrix[xnaModel.Bones.Count];
             xnaModel.CopyAbsoluteBoneTransformsTo(ModelTransforms);
+        }
+
+        public virtual void LoadContent()
+        {
+
         }
     }
 }

@@ -41,7 +41,7 @@ namespace MGChoplifter.Entities
         float BoundLowY = -219.5f;
         float BoundHighY = 364.25f;
         float BoundRightX = 145.5f;
-        float BoundLeftX = -6600 * 2;
+        public float BoundLeftX = -6600 * 2;
         int ShotLimit = 5;
         bool FacingChanged;
         bool Coasting;
@@ -66,10 +66,9 @@ namespace MGChoplifter.Entities
             base.Initialize();
 
             Facing = Direction.Right;
-
         }
 
-        public void LoadContent()
+        public override void LoadContent()
         {
             MainBlade.LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerMainBlade"), null);
             Rotor.LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerRotor"), null);
@@ -91,13 +90,14 @@ namespace MGChoplifter.Entities
             Rotor.AddAsChild(this, true, false);
 
             MainBlade.Position = new Vector3(0, 12f, 0);
-            MainBlade.RotationVelocity = new Vector3(0, 10, 0);
-            Rotor.Position = new Vector3(-26, 8f, 0);
-            Rotor.RotationVelocity = new Vector3(0, 0, 16);
+            MainBlade.RotationVelocity = new Vector3(0, 20, 0);
+            Rotor.Position = new Vector3(-26, 8, -2);
+            Rotor.RotationVelocity = new Vector3(0, 0, 24);
 
             for (int i = 0; i < ShotLimit; i++)
             {
                 Shots[i].Active = false;
+                Shots[i].Scale = 2;
             }
         }
 
@@ -148,7 +148,6 @@ namespace MGChoplifter.Entities
                 }
             }
 
-            //+		Position	62.65797  -126.4613  0	Microsoft.Xna.Framework.Vector3
             Acceleration = Vector3.Zero;
             MoveHorizontal = 0;
             Coasting = true;
@@ -249,8 +248,6 @@ namespace MGChoplifter.Entities
                     }
 
                     Shots[i].Spawn(pos, vel);
-
-
                     break;
                 }
             }
@@ -334,13 +331,13 @@ namespace MGChoplifter.Entities
 
                 case Direction.ForwardFromRight:
                 case Direction.ForwardFromLeft:
-                    if (Rotation.X > (MoveHorizontal * -Tilt) + (Velocity.X * comp))
+                    if (Rotation.X > (MoveHorizontal * Tilt) - (Velocity.X * comp))
                     {
                         RotationVelocity.X = -RotateRate * 0.25f;
                     }
                     else
                     {
-                        Rotation.X = (MoveHorizontal * -Tilt) + (Velocity.X * comp);
+                        Rotation.X = (MoveHorizontal * Tilt) - (Velocity.X * comp);
                     }
 
                     RotationVelocity.Z = 0;

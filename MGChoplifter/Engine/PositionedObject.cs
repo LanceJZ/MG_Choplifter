@@ -18,9 +18,11 @@ namespace Engine
 		public Vector3 Position = Vector3.Zero;
 		public Vector3 Acceleration = Vector3.Zero;
 		public Vector3 Velocity = Vector3.Zero;
-		public Vector3 ReletivePosition = Vector3.Zero;
+		public Vector3 ParentPosition = Vector3.Zero;
         public Vector3 Rotation = Vector3.Zero;
-        public Vector3 ReletiveRotation = Vector3.Zero;
+        public Vector3 ParentRotation = Vector3.Zero;
+        public Vector3 WorldPosition = Vector3.Zero;
+        public Vector3 WorldRotation = Vector3.Zero;
         public Vector3 RotationVelocity = Vector3.Zero;
         public Vector3 RotationAcceleration = Vector3.Zero;
 		public Rectangle AABB = Rectangle.Empty; // The axis-aligned bounding box.
@@ -150,11 +152,13 @@ namespace Engine
                 }
                 else
                 {
-                    ReletivePosition = ParentPO.Position;
-                    ReletiveRotation = ParentPO.Rotation;
+                    ParentPosition = ParentPO.Position;
+                    ParentRotation = ParentPO.Rotation;
+                    WorldPosition = Position + ParentPosition + ParentPO.ParentPosition;
+                    WorldRotation = Rotation + ParentRotation + ParentPO.ParentRotation;
                 }
 
-				if (ActiveDependent)
+                if (ActiveDependent)
 					ParentPO.Active = Active;
 			}
 		}

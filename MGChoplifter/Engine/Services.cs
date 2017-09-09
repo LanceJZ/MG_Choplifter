@@ -21,9 +21,10 @@ namespace Engine
         private static Vector3 m_SpecularColor = Vector3.Zero;
         private static Vector3 m_AmbientLightColor = new Vector3(0.25f, 0.25f, 0.25f);
         private static Vector3 m_EmissivieColor = Vector3.Zero;
-        private static List<IDrawComponent> m_DrawableComponents;
-        private static List<IUpdateableComponent> m_UpdateableComponents;
+        private static List<IDrawComponent> m_Drawable;
+        private static List<IUpdateableComponent> m_Updateable;
         private static List<IBeginable> m_Beginable;
+        private static List<ILoadContent> m_Loadable;
         #endregion
         #region Properties
         /// <summary>
@@ -84,19 +85,19 @@ namespace Engine
         }
         #endregion
         #region Public Methods
-        protected override void LoadContent()
-        {
-            foreach(IDrawComponent loadable in m_DrawableComponents)
-            {
-                //loadable.LoadContent();
-            }
-        }
-
         public static void BeginRun()
         {
             foreach(IBeginable begin in m_Beginable)
             {
                 begin.BeginRun();
+            }
+        }
+
+        protected override void LoadContent()
+        {
+            foreach(ILoadContent load in m_Loadable)
+            {
+                load.LoadContent();
             }
         }
 
@@ -109,7 +110,7 @@ namespace Engine
             //    pass.Apply();
             //}
 
-            foreach (IDrawComponent drawable in m_DrawableComponents)
+            foreach (IDrawComponent drawable in m_Drawable)
             {
                 drawable.Draw(gameTime);
             }
@@ -119,7 +120,7 @@ namespace Engine
         {
             base.Update(gameTime);
 
-            foreach (IUpdateableComponent updateable in m_UpdateableComponents)
+            foreach (IUpdateableComponent updateable in m_Updateable)
             {
                 updateable.Update(gameTime);
             }
@@ -148,9 +149,10 @@ namespace Engine
                 //BasicEffect.Projection = m_ProjectionMatrix;
                 //BasicEffect.World = WorldMatrix;
                 //m_WorldMatrix = Matrix.CreateTranslation(Vector3.Zero);
-                m_DrawableComponents = new List<IDrawComponent>();
-                m_UpdateableComponents = new List<IUpdateableComponent>();
+                m_Drawable = new List<IDrawComponent>();
+                m_Updateable = new List<IUpdateableComponent>();
                 m_Beginable = new List<IBeginable>();
+                m_Loadable = new List<ILoadContent>();
 
                 return;
             }
@@ -170,12 +172,12 @@ namespace Engine
 
         public static void AddDrawableComponent(IDrawComponent drawableComponent)
         {
-            m_DrawableComponents.Add(drawableComponent);
+            m_Drawable.Add(drawableComponent);
         }
 
         public static void AddUpdateableComponent(IUpdateableComponent updateableComponent)
         {
-            m_UpdateableComponents.Add(updateableComponent);
+            m_Updateable.Add(updateableComponent);
         }
 
         public static void AddBeginable(IBeginable beginable)
@@ -183,6 +185,10 @@ namespace Engine
             m_Beginable.Add(beginable);
         }
 
+        public static void AddLoadable(ILoadContent load)
+        {
+            m_Loadable.Add(load);
+        }
         #endregion
     }
 }

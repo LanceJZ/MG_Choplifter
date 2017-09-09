@@ -48,6 +48,7 @@
     <Compile Include="Engine\BoundingPart.cs" />
     <Compile Include="Engine\BoundingPartList.cs" />
     <Compile Include="Engine\Camera.cs" />
+    <Compile Include="Engine\ILoadContent.cs" />
     <Compile Include="Engine\MeshInfo.cs" />
     <Compile Include="Engine\Plane.cs" />
     <Compile Include="Engine\SModel.cs" />
@@ -63,10 +64,13 @@
     <Compile Include="Engine\SpritePositionedObject.cs" />
     <Compile Include="Engine\Timer.cs" />
     <Compile Include="Entities\Background.cs" />
+    <Compile Include="Entities\EnemyControl.cs" />
     <Compile Include="Entities\HouseControl.cs" />
-    <Compile Include="Entities\MountianControl.cs" />
     <Compile Include="Entities\Shot.cs" />
     <Compile Include="Entities\StarControl.cs" />
+    <Compile Include="Entities\Tank.cs" />
+    <Compile Include="Entities\TankTred.cs" />
+    <Compile Include="Entities\TankTurret.cs" />
     <Compile Include="Entities\ThePlayer.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />
