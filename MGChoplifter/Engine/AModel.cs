@@ -27,7 +27,7 @@ namespace Engine
 
         public AModel(Game game, XNAModel model, Texture2D texture) : base(game)
         {
-            LoadModel(model, texture);
+            SetModel(model, texture);
         }
 
         public override void Initialize()
@@ -78,7 +78,7 @@ namespace Engine
                     BaseWorld *= Matrix.CreateFromYawPitchRoll(ParentPO.Rotation.Y + ParentPO.ParentRotation.Y,
                         ParentPO.Rotation.X + ParentPO.ParentRotation.X,
                         ParentPO.Rotation.Z + ParentPO.ParentRotation.Z)
-                    * Matrix.CreateTranslation(ParentPO.Position + ParentPO.ParentPosition);
+                        * Matrix.CreateTranslation(ParentPO.Position + ParentPO.ParentPosition);
             }
         }
 
@@ -91,17 +91,10 @@ namespace Engine
 
                 foreach (ModelMesh mesh in xnaModel.Meshes)
                 {
-                    //Matrix localWorld = modelTransforms[mesh.ParentBone.Index]
-                    //   * baseWorld;
-
                     foreach (ModelMeshPart meshPart in mesh.MeshParts)
                     {
                         BasicEffect effect = (BasicEffect)meshPart.Effect;
-                        //effect.TextureEnabled = true;
-
-                        if (XNATexture != null)
-                            effect.Texture = XNATexture;
-
+                        effect.Texture = XNATexture ?? effect.Texture; //Replace texture if XNATexture is not null.
                         effect.EnableDefaultLighting();
                         effect.PreferPerPixelLighting = true;
                         effect.World = BaseWorld;
@@ -113,7 +106,12 @@ namespace Engine
             }
         }
 
-        public void LoadModel(XNAModel model, Texture2D texture)
+        public void SetModel(XNAModel model)
+        {
+            SetModel(model, null);
+        }
+
+        public void SetModel(XNAModel model, Texture2D texture)
         {
             xnaModel = model;
             XNATexture = texture;

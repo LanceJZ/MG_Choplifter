@@ -30,7 +30,7 @@ namespace MGChoplifter.Entities
             base.Initialize();
 
             Tank.Position.Y = -280;
-            Tank.Position.X = -1000;
+            Tank.Position.X = -5000;
             Tank.PlayerRef = PlayerRef;
 
             S.AddBeginable(this);

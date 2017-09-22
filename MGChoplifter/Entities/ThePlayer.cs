@@ -23,7 +23,7 @@ namespace MGChoplifter.Entities
 
         Engine.AModel MainBlade;
         Engine.AModel Rotor;
-        Shot[] Shots = new Shot[5];
+        public Shot[] Shots = new Shot[5];
 
         T FireTimer;
         T TurnTimer;
@@ -32,8 +32,8 @@ namespace MGChoplifter.Entities
         KeyboardState KeyStateOld;
 
         float AccelerationAmount = 220;
-        float MaxSpeed = 350;
-        float Tilt = MathHelper.PiOver4 / 10f;
+        float MaxSpeed = 650;
+        float Tilt = MathHelper.PiOver4 / 12f;
         float FireRate = 0.1f;
         float TurnRate = 1.1f;
         float RotateRate = MathHelper.PiOver2;
@@ -70,15 +70,15 @@ namespace MGChoplifter.Entities
 
         public override void LoadContent()
         {
-            MainBlade.LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerMainBlade"), null);
-            Rotor.LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerRotor"), null);
-            LoadModel(Game.Content.Load<XnaModel>("Models/CLPlayerChopper"), null);
+            MainBlade.SetModel(Game.Content.Load<XnaModel>("Models/CLPlayerMainBlade"));
+            Rotor.SetModel(Game.Content.Load<XnaModel>("Models/CLPlayerRotor"));
+            SetModel(Game.Content.Load<XnaModel>("Models/CLPlayerChopper"));
 
             XnaModel shotM = Game.Content.Load<XnaModel>("Models/cube");
 
             for (int i = 0; i < ShotLimit; i++)
             {
-                Shots[i].LoadModel(shotM);
+                Shots[i].SetModel(shotM);
             }
         }
 
@@ -97,7 +97,6 @@ namespace MGChoplifter.Entities
             for (int i = 0; i < ShotLimit; i++)
             {
                 Shots[i].Active = false;
-                Shots[i].Scale = 2;
             }
         }
 
@@ -247,7 +246,7 @@ namespace MGChoplifter.Entities
                             break;
                     }
 
-                    Shots[i].Spawn(pos, vel);
+                    Shots[i].Spawn(pos, vel, 1.5f);
                     break;
                 }
             }
@@ -299,7 +298,7 @@ namespace MGChoplifter.Entities
 
         void TeltChopper()
         {
-            float comp = 0.002f;
+            float comp = 0.001f;
 
             switch (Facing)
             {
@@ -331,13 +330,23 @@ namespace MGChoplifter.Entities
 
                 case Direction.ForwardFromRight:
                 case Direction.ForwardFromLeft:
-                    if (Rotation.X > (MoveHorizontal * Tilt) - (Velocity.X * comp))
+
+                    if (Rotation.X > (MoveHorizontal * Tilt) - (Velocity.X * 0.5f * comp))
                     {
                         RotationVelocity.X = -RotateRate * 0.25f;
                     }
                     else
                     {
-                        Rotation.X = (MoveHorizontal * Tilt) - (Velocity.X * comp);
+                        Rotation.X = (MoveHorizontal * Tilt) - (Velocity.X * 0.5f * comp);
+                    }
+
+                    if (Rotation.X < (MoveHorizontal * Tilt) - (Velocity.X * 0.5f * comp))
+                    {
+                        RotationVelocity.X = RotateRate * 0.25f;
+                    }
+                    else
+                    {
+                        Rotation.X = (MoveHorizontal * Tilt) - (Velocity.X * 0.5f * comp);
                     }
 
                     RotationVelocity.Z = 0;

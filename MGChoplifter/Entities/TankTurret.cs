@@ -15,11 +15,15 @@ namespace MGChoplifter.Entities
     {
         public ThePlayer PlayerRef;
         Engine.AModel Barral;
+        Shot TankShot;
+        T ShotTimer;
 
         public TankTurret(Game game, ThePlayer player) : base(game)
         {
             PlayerRef = player;
             Barral = new Engine.AModel(game);
+            TankShot = new Shot(game);
+            ShotTimer = new T(game, 4.1f);
         }
 
         public override void Initialize()
@@ -27,12 +31,15 @@ namespace MGChoplifter.Entities
             base.Initialize();
 
             Barral.AddAsChild(this, true, false);
+            TankShot.Active = false;
+            TankShot.Acceleration.Y = -50;
         }
 
         public override void LoadContent()
         {
-            LoadModel(Game.Content.Load<XnaModel>("Models/CLTankTurret"), null);
-            Barral.LoadModel(Game.Content.Load<XnaModel>("Models/CLTankBarral"), null);
+            SetModel(Game.Content.Load<XnaModel>("Models/CLTankTurret"));
+            Barral.SetModel(Game.Content.Load<XnaModel>("Models/CLTankBarral"));
+            TankShot.SetModel(Game.Content.Load<XnaModel>("Models/cube"));
         }
 
         public override void BeginRun()
@@ -46,11 +53,26 @@ namespace MGChoplifter.Entities
         {
             base.Update(gameTime);
 
-            Vector2 target = new Vector2(PlayerRef.Position.X, PlayerRef.Position.Y);
+            Vector2 target = new Vector2(PlayerRef.Position.X, 100);
             Vector2 pos = new Vector2(WorldPosition.X, WorldPosition.Y);
             Rotation.Y = AngleToTurret(pos, target);
 
             Barral.Rotation.Z = MathHelper.Clamp(AngleToBarral(pos, target), 0, MathHelper.PiOver4);
+
+            if (ShotTimer.Expired)
+            {
+                ShotTimer.Reset();
+                FireShot();
+            }
+        }
+
+        void FireShot()
+        {
+            Vector2 pos = new Vector2(Barral.WorldPosition.X, Barral.WorldPosition.Y);
+            Vector2 target = new Vector2(PlayerRef.Position.X, 100);
+            Vector2 pvel = new Vector2(ParentPO.Velocity.X, ParentPO.Velocity.Y);
+
+            TankShot.Spawn(WorldPosition, SetVelocity(AngleFromVectors(pos, target), 100) + pvel, 3.5f);
         }
 
         float AngleToBarral(Vector2 pos, Vector2 target)

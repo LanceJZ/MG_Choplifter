@@ -50,15 +50,15 @@ namespace MGChoplifter
             Content.RootDirectory = "Content";
 
             Player = new E.ThePlayer(this);
-            Houses = new E.HouseControl(this);
             Background = new E.Background(this, Player);
             Enemies = new E.EnemyControl(this, Player);
+            Houses = new E.HouseControl(this, Player);
         }
 
         private void SetMultiSampling(object sender, PreparingDeviceSettingsEventArgs eventArgs)
         {
             PresentationParameters PresentParm = eventArgs.GraphicsDeviceInformation.PresentationParameters;
-            PresentParm.MultiSampleCount = 4;
+            PresentParm.MultiSampleCount = 8;
         }
 
         /// <summary>
@@ -86,29 +86,29 @@ namespace MGChoplifter
         /// </summary>
         protected override void LoadContent()
         {
-            //cubeTest.LoadModel(Content.Load<XnaModel>("Models/Cube"), null);
-
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             if (ModelTest.Count < 16)
                 return;
 
-            ModelTest[0].LoadModel(Content.Load<XnaModel>("Models/CLHouse"), null);
-            ModelTest[1].LoadModel(Content.Load<XnaModel>("Models/CLPlayerChopper"), null);
-            ModelTest[2].LoadModel(Content.Load<XnaModel>("Models/CLTankBody"), null);
-            ModelTest[3].LoadModel(Content.Load<XnaModel>("Models/CLBarakade"), null);
-            ModelTest[4].LoadModel(Content.Load<XnaModel>("Models/CLBaseV2"), null);
-            ModelTest[5].LoadModel(Content.Load<XnaModel>("Models/CLHouseOpen"), null);
-            ModelTest[6].LoadModel(Content.Load<XnaModel>("Models/CLPersonArm"), null);
-            ModelTest[7].LoadModel(Content.Load<XnaModel>("Models/CLPersonLeg"), null);
-            ModelTest[8].LoadModel(Content.Load<XnaModel>("Models/CLPersonMan"), null);
-            ModelTest[9].LoadModel(Content.Load<XnaModel>("Models/CLPlayerMainBlade"), null);
-            ModelTest[10].LoadModel(Content.Load<XnaModel>("Models/CLPlayerRotor"), null);
-            ModelTest[11].LoadModel(Content.Load<XnaModel>("Models/CLTankBarral"), null);
-            ModelTest[12].LoadModel(Content.Load<XnaModel>("Models/CLTankTred1"), null);
-            ModelTest[13].LoadModel(Content.Load<XnaModel>("Models/CLTankTred2"), null);
-            ModelTest[14].LoadModel(Content.Load<XnaModel>("Models/CLTankTurret"), null);
-            ModelTest[15].LoadModel(Content.Load<XnaModel>("Models/Mountain"), null);
+            //cubeTest.LoadModel(Content.Load<XnaModel>("Models/Cube"));
+
+            //ModelTest[0].SetModel(Content.Load<XnaModel>("Models/CLHouse"));
+            //ModelTest[1].SetModel(Content.Load<XnaModel>("Models/CLPlayerChopper"));
+            //ModelTest[2].SetModel(Content.Load<XnaModel>("Models/CLTankBody"));
+            //ModelTest[3].SetModel(Content.Load<XnaModel>("Models/CLBarakade"));
+            //ModelTest[4].SetModel(Content.Load<XnaModel>("Models/CLBaseV2"));
+            //ModelTest[5].SetModel(Content.Load<XnaModel>("Models/CLHouseOpen"));
+            //ModelTest[6].SetModel(Content.Load<XnaModel>("Models/CLPersonArm"));
+            //ModelTest[7].SetModel(Content.Load<XnaModel>("Models/CLPersonLeg"));
+            //ModelTest[8].SetModel(Content.Load<XnaModel>("Models/CLPersonMan"));
+            //ModelTest[9].SetModel(Content.Load<XnaModel>("Models/CLPlayerMainBlade"));
+            //ModelTest[10].SetModel(Content.Load<XnaModel>("Models/CLPlayerRotor"));
+            //ModelTest[11].SetModel(Content.Load<XnaModel>("Models/CLTankBarral"));
+            //ModelTest[12].SetModel(Content.Load<XnaModel>("Models/CLTankTred1"));
+            //ModelTest[13].SetModel(Content.Load<XnaModel>("Models/CLTankTred2"));
+            //ModelTest[14].SetModel(Content.Load<XnaModel>("Models/CLTankTurret"));
+            //ModelTest[15].SetModel(Content.Load<XnaModel>("Models/Mountain"));
         }
 
         protected override void BeginRun()
@@ -117,7 +117,7 @@ namespace MGChoplifter
 
             cubeTest.Scale = 10;
 
-            S.BeginRun();
+            S.BeginRun(); //This only happens once in a game.
 
             float posx = 0;
             float posy = 0;
@@ -160,9 +160,7 @@ namespace MGChoplifter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.DarkBlue);
-
-
+            GraphicsDevice.Clear(new Color(5, 0, 40));
 
             base.Draw(gameTime);
         }

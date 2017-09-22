@@ -210,7 +210,7 @@ namespace Engine
         /// <param name="Target">Position of target.</param>
         /// <param name="TargetRadius">Radius of target.</param>
         /// <returns></returns>
-		public bool CirclesIntersect(Vector2 Target, float TargetRadius)
+		public bool CirclesIntersect(Vector3 Target, float TargetRadius)
 		{
 			float distanceX = Target.X - Position.X;
 			float distanceY = Target.Y - Position.Y;
@@ -221,6 +221,23 @@ namespace Engine
 
 			return false;
 		}
+        /// <summary>
+        /// Circle collusion detection. Target circle will be compared to this class's.
+        /// Will return true of they intersect.
+        /// </summary>
+        /// <param name="Target">Target Positioned Object.</param>
+        /// <returns></returns>
+		public bool CirclesIntersect(PositionedObject Target)
+        {
+            float distanceX = Target.Position.X - Position.X;
+            float distanceY = Target.Position.Y - Position.Y;
+            float radius = Radius + Target.Radius;
+
+            if ((distanceX * distanceX) + (distanceY * distanceY) < radius * radius)
+                return true;
+
+            return false;
+        }
         /// <summary>
         /// Returns a Vector2 direction of travel from angle and magnitude.
         /// </summary>

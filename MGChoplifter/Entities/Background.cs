@@ -66,7 +66,7 @@ namespace MGChoplifter.Entities
 
         public void LoadContent()
         {
-            Base.LoadModel(Game.Content.Load<XnaModel>("Models/CLBaseV2"), null);
+            Base.SetModel(Game.Content.Load<XnaModel>("Models/CLBaseV2"), null);
             XnaModel block = Game.Content.Load<XnaModel>("Models/CLBarakade");
             XnaModel mount = Game.Content.Load<XnaModel>("Models/Mountain");
             Texture2D grass = Game.Content.Load<Texture2D>("Textures/Grass");
@@ -78,12 +78,12 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < Blockades.Length; i++)
             {
-                Blockades[i].LoadModel(block, null);
+                Blockades[i].SetModel(block, null);
             }
 
             for (int i = 0; i < Mountians.Length; i ++)
             {
-                Mountians[i].LoadModel(mount, null);
+                Mountians[i].SetModel(mount, null);
             }
         }
 
@@ -92,7 +92,7 @@ namespace MGChoplifter.Entities
             Base.Position = new Vector3(100, -234, -50);
 
             float spaceBetweenBlocks = -8;
-            float spaceBetweenMounts = -830f;
+            float spaceBetweenMounts = -550f;
             float startGrassX = 10 + -spaceBetweenGrass * (int)(Grass.Length / 6);
             float startGrassY = -267;
             float startBlockX = -600;
@@ -145,7 +145,6 @@ namespace MGChoplifter.Entities
                 int levelthree = i + (int)(Grass.Length / 3) * 2;
 
                 Grass[leveltwo].Velocity.X = -PlayerRef.Velocity.X * 0.25f;
-
                 Grass[levelthree].Velocity.X = -PlayerRef.Velocity.X * 0.5f;
             }
 
@@ -175,7 +174,7 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < Mountians.Length; i++)
             {
-                Mountians[i].Position.X = MountianX[i] + (S.Camera.Position.X * 0.5f);
+                Mountians[i].Position.X = MountianX[i] + (S.Camera.Position.X * 0.35f);
             }
         }
     }

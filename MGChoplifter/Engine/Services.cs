@@ -15,7 +15,7 @@ namespace Engine
         private static Random m_RandomNumber;
         private static SpriteBatch m_SpriteBatch;
         private static GraphicsDeviceManager m_GraphicsDM;
-        private static Camera camera;
+        private static Camera m_Camera;
         private static Vector3 m_DefuseLight = Vector3.One;
         private static Vector3 m_LightDirection = Vector3.Left;
         private static Vector3 m_SpecularColor = Vector3.Zero;
@@ -48,7 +48,7 @@ namespace Engine
 
         public static GraphicsDeviceManager GraphicsDM { get => m_GraphicsDM; }
         public static SpriteBatch SpriteBatch { get => m_SpriteBatch; set => m_SpriteBatch = value; }
-        public static Camera Camera { get => camera; }
+        public static Camera Camera { get => m_Camera; }
         public static Random RandomNumber { get => m_RandomNumber; }
         /// <summary>
         /// Returns the window size in pixels, of the height.
@@ -105,11 +105,6 @@ namespace Engine
         {
             base.Draw(gameTime);
 
-            //foreach (EffectPass pass in BasicEffect.CurrentTechnique.Passes)
-            //{
-            //    pass.Apply();
-            //}
-
             foreach (IDrawComponent drawable in m_Drawable)
             {
                 drawable.Draw(gameTime);
@@ -142,13 +137,7 @@ namespace Engine
                 //Create the Engine Services
                 m_Instance = new Services(game);
                 m_RandomNumber = new Random(DateTime.Now.Millisecond);
-                camera = new Camera(game, CameraPosition, Vector3.Zero, Vector3.Zero, true, near, far);
-                //BasicEffect = new BasicEffect(graphics.GraphicsDevice);
-                //BasicEffect.LightingEnabled = true;
-                //BasicEffect.View = m_ViewMatrix;
-                //BasicEffect.Projection = m_ProjectionMatrix;
-                //BasicEffect.World = WorldMatrix;
-                //m_WorldMatrix = Matrix.CreateTranslation(Vector3.Zero);
+                m_Camera = new Camera(game, CameraPosition, Vector3.Zero, Vector3.Zero, true, near, far);
                 m_Drawable = new List<IDrawComponent>();
                 m_Updateable = new List<IUpdateableComponent>();
                 m_Beginable = new List<IBeginable>();

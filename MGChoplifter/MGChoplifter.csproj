@@ -66,6 +66,7 @@
     <Compile Include="Entities\Background.cs" />
     <Compile Include="Entities\EnemyControl.cs" />
     <Compile Include="Entities\HouseControl.cs" />
+    <Compile Include="Entities\Person.cs" />
     <Compile Include="Entities\Shot.cs" />
     <Compile Include="Entities\StarControl.cs" />
     <Compile Include="Entities\Tank.cs" />

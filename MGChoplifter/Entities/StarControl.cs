@@ -26,6 +26,8 @@ namespace MGChoplifter.Entities
         {
             base.Initialize();
 
+            float spinSpeed = 7.5f;
+
             for (int i = 0; i < Stars.Length; i++)
             {
                 Stars[i] = new Engine.AModel(Game);
@@ -34,9 +36,10 @@ namespace MGChoplifter.Entities
             for (int i = 0; i < Stars.Length; i++)
             {
                 Stars[i].Position = new Vector3(S.RandomMinMax(-600, 600), S.RandomMinMax(-200, 400), -300);
+                Stars[i].RotationVelocity = new Vector3(S.RandomMinMax(-spinSpeed, spinSpeed),
+                    S.RandomMinMax(-spinSpeed, spinSpeed), S.RandomMinMax(-spinSpeed, spinSpeed));
+                Stars[i].Scale = S.RandomNumber.Next(1, 3);
                 StarsX[i] = Stars[i].Position.X;
-                Stars[i].RotationVelocity = new Vector3(S.RandomMinMax(-10, 10), S.RandomMinMax(-10, 10),
-                    S.RandomMinMax(-10, 10));
             }
 
             S.AddBeginable(this);
@@ -47,7 +50,7 @@ namespace MGChoplifter.Entities
         {
             for (int i = 0; i < Stars.Length; i++)
             {
-                Stars[i].LoadModel(Game.Content.Load<XnaModel>("Models/cube"), null);
+                Stars[i].SetModel(Game.Content.Load<XnaModel>("Models/cube"), null);
             }
         }
 

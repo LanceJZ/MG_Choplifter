@@ -15,12 +15,10 @@ namespace MGChoplifter.Entities
     {
         public ThePlayer PlayerRef;
         TankTurret Turret;
-        Engine.AModel[] TredAnimationsL = new Engine.AModel[2];
-        Engine.AModel[] TredAnimationsR = new Engine.AModel[2];
-        T AnimationTimer;
-
-        float MaxSpeed = 70;
-        bool Moving;
+        TankTred[] Treds = new TankTred[2];
+        float MaxSpeed;
+        float Seperation;
+        float RightBound;
 
         public Tank(Game game, ThePlayer player) : base(game)
         {
@@ -29,82 +27,67 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < 2; i++)
             {
-                TredAnimationsL[i] = new Engine.AModel(game);
-                TredAnimationsL[i].AddAsChild(this, true, false);
-                TredAnimationsR[i] = new Engine.AModel(game);
-                TredAnimationsR[i].AddAsChild(this, true, false);
+                Treds[i] = new TankTred(game);
+                Treds[i].AddAsChild(this, true, false);
             }
-
-            AnimationTimer = new T(game, 0.1f);
         }
 
         public override void Initialize()
         {
             base.Initialize();
 
-            Turret.Position.Y = 10;
-
-            for (int i = 0; i < 2; i++)
-            {
-                TredAnimationsL[i].Position = new Vector3(0, -2, -16);
-                TredAnimationsR[i].Position = new Vector3(0, -2, 16);
-            }
+            MaxSpeed = S.RandomMinMax(50, 100);
+            Seperation = S.RandomMinMax(100, 200);
+            RightBound = S.RandomMinMax(-1000, -1100);
 
             Turret.AddAsChild(this, true, false);
+            Turret.Position.Y = 10;
+
+            Treds[0].Position = new Vector3(0, -2, -16);
+            Treds[1].Position = new Vector3(0, -2, 16);
+
         }
 
         public override void LoadContent()
         {
-            LoadModel(Game.Content.Load<XnaModel>("Models/CLTankBody"), null);
+            SetModel(Game.Content.Load<XnaModel>("Models/CLTankBody"));
             Turret.LoadContent();
-
-            TredAnimationsL[0].LoadModel(Game.Content.Load<XnaModel>("Models/CLTankTred1"), null);
-            TredAnimationsL[1].LoadModel(Game.Content.Load<XnaModel>("Models/CLTankTred2"), null);
-            TredAnimationsR[0].LoadModel(Game.Content.Load<XnaModel>("Models/CLTankTred1"), null);
-            TredAnimationsR[1].LoadModel(Game.Content.Load<XnaModel>("Models/CLTankTred2"), null);
-
         }
 
         public override void BeginRun()
         {
             base.BeginRun();
-
-            TredAnimationsL[0].Visable = false;
-            TredAnimationsR[1].Visable = false;
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            if (AnimationTimer.Expired && Moving)
+            foreach (TankTred tred in Treds)
             {
-                AnimationTimer.Reset();
+                tred.Moving = false;
+            }
 
-                for (int i = 0; i < 2; i++)
+            Velocity.X = 0;
+            float differnceX = PlayerRef.Position.X - Position.X;
+
+            if (differnceX > Seperation && PlayerRef.Position.X < RightBound)
+            {
+                Velocity.X = MathHelper.Clamp(differnceX * 0.1f, -MaxSpeed, MaxSpeed);
+
+                foreach (TankTred tred in Treds)
                 {
-                    TredAnimationsL[i].Visable = !TredAnimationsL[i].Visable;
-                    TredAnimationsR[i].Visable = !TredAnimationsL[i].Visable;
+                    tred.Moving = true;
                 }
             }
 
-            Moving = false;
-            Velocity.X = 0;
-            float differnceX = PlayerRef.Position.X - Position.X;
-            float seperation = 150;
-
-
-
-            if (differnceX > seperation && PlayerRef.Position.X < -800)
+            if (differnceX < -Seperation && PlayerRef.Position.X > PlayerRef.BoundLeftX)
             {
-                Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
-                Moving = true;
-            }
-
-            if (differnceX < -seperation && PlayerRef.Position.X > PlayerRef.BoundLeftX)
-            {
-                Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
-                Moving = true;
+                Velocity.X = MathHelper.Clamp(differnceX * 0.1f, -MaxSpeed, MaxSpeed);
+                foreach (TankTred tred in Treds)
+                {
+                    tred.Moving = true;
+                }
             }
         }
     }

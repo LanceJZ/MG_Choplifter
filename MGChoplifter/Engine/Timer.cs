@@ -56,5 +56,11 @@ namespace Engine
         {
             m_Seconds = 0;
         }
+
+        public void Reset(float time)
+        {
+            m_Seconds = 0;
+            m_Amount = time;
+        }
     }
 }
