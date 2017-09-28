@@ -8,10 +8,11 @@ using System;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
+    using Sys = Engine.Services;
+    using Time = Engine.Timer;
+    using Mod = Engine.AModel;
 
-    public class ThePlayer : Engine.AModel
+    public class ThePlayer : Mod
     {
         enum Direction
         {
@@ -21,43 +22,67 @@ namespace MGChoplifter.Entities
             ForwardFromLeft
         };
 
-        Engine.AModel MainBlade;
-        Engine.AModel Rotor;
-        public Shot[] Shots = new Shot[5];
+        enum CurrentState
+        {
+            Unload,
+            Load,
+            Flight
+        };
 
-        T FireTimer;
-        T TurnTimer;
+        public Shot[] Shots = new Shot[5];
+        public Person[] People = new Person[4];
+
+        Mod MainBlade;
+        Mod Rotor;
+
+        Time FireTimer;
+        Time TurnTimer;
+        Time UnloadTimer;
 
         KeyboardState KeyState;
         KeyboardState KeyStateOld;
 
+        public XnaModel PersonMan;
+        public XnaModel PersonLeg;
+        public XnaModel PersonArm;
+        public float BoundLeftX = -6600 * 2;
+        public float BoundLowY = -219.5f;
         float AccelerationAmount = 220;
         float MaxSpeed = 650;
         float Tilt = MathHelper.PiOver4 / 12f;
+        float UnloadRate = 1.5f;
         float FireRate = 0.1f;
         float TurnRate = 1.1f;
         float RotateRate = MathHelper.PiOver2;
         float MoveHorizontal;
-        float BoundLowY = -219.5f;
         float BoundHighY = 364.25f;
         float BoundRightX = 145.5f;
-        public float BoundLeftX = -6600 * 2;
+        float UnloadX = 10.5f;
         int ShotLimit = 5;
+        int NumberOfPassengers;
+        int PassengerLimit = 4;
         bool FacingChanged;
         bool Coasting;
 
         Direction Facing;
+        CurrentState State;
 
         public ThePlayer(Game game) : base(game)
         {
-            MainBlade = new Engine.AModel(game);
-            Rotor = new Engine.AModel(game);
-            FireTimer = new T(game, FireRate);
-            TurnTimer = new T(game, TurnRate);
+            MainBlade = new Mod(game);
+            Rotor = new Mod(game);
+            FireTimer = new Time(game, FireRate);
+            TurnTimer = new Time(game, TurnRate);
+            UnloadTimer = new Time(game, UnloadRate);
 
             for(int i = 0; i < ShotLimit; i++)
             {
                 Shots[i] = new Shot(game);
+            }
+
+            for (int i = 0; i < People.Length; i++)
+            {
+                People[i] = new Person(game, this);
             }
         }
 
@@ -65,7 +90,10 @@ namespace MGChoplifter.Entities
         {
             base.Initialize();
 
+            Radius = 26;
             Facing = Direction.Right;
+            State = CurrentState.Flight;
+            NumberOfPassengers = 2; //TODO: For testing. Should be zero.
         }
 
         public override void LoadContent()
@@ -94,9 +122,15 @@ namespace MGChoplifter.Entities
             Rotor.Position = new Vector3(-26, 8, -2);
             Rotor.RotationVelocity = new Vector3(0, 0, 24);
 
-            for (int i = 0; i < ShotLimit; i++)
+            for (int i = 0; i < People.Length; i++)
             {
-                Shots[i].Active = false;
+                People[i].SetModel(PersonMan);
+
+                for (int ii = 0; ii < 2; ii++)
+                {
+                    People[i].Arms[ii].SetModel(PersonArm);
+                    People[i].Legs[ii].SetModel(PersonLeg);
+                }
             }
         }
 
@@ -104,10 +138,11 @@ namespace MGChoplifter.Entities
         {
             base.Update(gameTime);
 
-            S.Camera.Position.X = Position.X;
+            Sys.Camera.Position.X = Position.X;
 
             GetInput();
             TeltChopper();
+            CheckToUnload();
 
             if (Position.X < BoundLeftX || Position.X > BoundRightX || Position.Y > BoundHighY || Position.Y < BoundLowY)
             {
@@ -120,7 +155,52 @@ namespace MGChoplifter.Entities
 
             if (Coasting)
                 WindResistance();
+        }
 
+        public bool PickUpPerson()
+        {
+            if (NumberOfPassengers == PassengerLimit)
+                return false;
+
+            NumberOfPassengers++;
+                return true;
+        }
+
+        void CheckToUnload()
+        {
+            if (Position.Y < -215 && Velocity == Vector3.Zero && Position.X > UnloadX)
+            {
+                if (State == CurrentState.Flight)
+                    UnloadTimer.Reset();
+
+                State = CurrentState.Unload;
+            }
+            else
+            {
+                State = CurrentState.Flight;
+            }
+
+            switch (State)
+            {
+                case CurrentState.Unload:
+                    Unload();
+                    break;
+            }
+        }
+
+        void Unload()
+        {
+            if (UnloadTimer.Expired)
+            {
+                UnloadTimer.Reset();
+
+                if (NumberOfPassengers > 0)
+                {
+                    Vector3 pos = new Vector3(Position.X, BoundLowY - 5, People[NumberOfPassengers].Position.Z);
+                    People[NumberOfPassengers].Spawn(pos, true);
+                    NumberOfPassengers--;
+                }
+            }
         }
 
         void GetInput()

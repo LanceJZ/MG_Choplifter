@@ -5,16 +5,18 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
+    using Sys = Services;
+    using Time = Timer;
+    using Mod = AModel;
 
-    public class TankTred : Engine.PositionedObject, Engine.ILoadContent
+    public class TankTred : PositionedObject, ILoadContent
     {
-        Engine.AModel[] TredAnimations = new Engine.AModel[2];
-        T AnimationTimer;
+        Mod[] TredAnimations = new Mod[2];
+        Time AnimationTimer;
 
         public bool Moving;
 
@@ -22,18 +24,18 @@ namespace MGChoplifter.Entities
         {
             for (int i = 0; i < 2; i++)
             {
-                TredAnimations[i] = new Engine.AModel(game);
+                TredAnimations[i] = new Mod(game);
                 TredAnimations[i].AddAsChild(this, true, false);
             }
 
-            AnimationTimer = new T(game, 0.1f);
+            AnimationTimer = new Time(game, 0.1f);
         }
 
         public override void Initialize()
         {
             base.Initialize();
 
-            S.AddLoadable(this);
+            Sys.AddLoadable(this);
         }
 
         public void LoadContent()

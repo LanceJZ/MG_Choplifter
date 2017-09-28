@@ -8,31 +8,26 @@ using System;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
+    using Sys = Engine.Services;
+    using Time = Engine.Timer;
+    using Mod = Engine.AModel;
 
-    public class Shot : Engine.AModel
+    public class Shot : Mod
     {
-        T LifeTimer;
+        Time LifeTimer;
 
         public Shot(Game game) : base(game)
         {
-            LifeTimer = new T(game, 2.2f);
+            LifeTimer = new Time(game);
         }
 
         public override void Initialize()
         {
             base.Initialize();
 
-            LifeTimer.Initialize();
-
-            Radius = 1;
-        }
-
-        public override void BeginRun()
-        {
-            base.BeginRun();
-
+            Active = false;
+            Radius = 2;
+            Scale = 2;
         }
 
         public override void Update(GameTime gameTime)
@@ -43,17 +38,13 @@ namespace MGChoplifter.Entities
                 Active = false;
         }
 
-        public void LoadModel(XnaModel model)
-        {
-            LoadModel(model, null);
-        }
-
-        public void Spawn(Vector3 postion, Vector2 direction)
+        public void Spawn(Vector3 postion, Vector2 direction, float timer)
         {
             Active = true;
             Position = postion;
             Velocity = new Vector3(direction.X, direction.Y, 0);
-            LifeTimer.Reset();
+            Vector3 acc = Acceleration;
+            LifeTimer.Reset(timer);
         }
     }
 }

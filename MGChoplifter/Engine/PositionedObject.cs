@@ -159,7 +159,7 @@ namespace Engine
                 }
 
                 if (ActiveDependent)
-					ParentPO.Active = Active;
+					Active = ParentPO.Active;
 			}
 		}
 

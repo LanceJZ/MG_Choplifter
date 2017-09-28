@@ -5,14 +5,15 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
-    using PO = Engine.PositionedObject;
+    using Sys = Services;
+    using Time = Timer;
+    using PO = PositionedObject;
 
-    public class EnemyControl : GameComponent, Engine.IBeginable, Engine.IUpdateableComponent
+    public class EnemyControl : GameComponent, IBeginable, IUpdateableComponent
     {
         public ThePlayer PlayerRef;
         Tank Tank;
@@ -33,7 +34,7 @@ namespace MGChoplifter.Entities
             Tank.Position.X = -5000;
             Tank.PlayerRef = PlayerRef;
 
-            S.AddBeginable(this);
+            Sys.AddBeginable(this);
         }
 
         public void BeginRun()

@@ -8,22 +8,24 @@ using System;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
+    using Sys = Engine.Services;
+    using Time = Engine.Timer;
+    using Mod = Engine.AModel;
 
-    public class TankTurret : Engine.AModel
+    public class TankTurret : Mod
     {
         public ThePlayer PlayerRef;
-        Engine.AModel Barral;
+        Mod Barral;
         Shot TankShot;
-        T ShotTimer;
+        Time ShotTimer;
 
         public TankTurret(Game game, ThePlayer player) : base(game)
         {
             PlayerRef = player;
-            Barral = new Engine.AModel(game);
+
+            Barral = new Mod(game);
             TankShot = new Shot(game);
-            ShotTimer = new T(game, 4.1f);
+            ShotTimer = new Time(game, 4.1f);
         }
 
         public override void Initialize()

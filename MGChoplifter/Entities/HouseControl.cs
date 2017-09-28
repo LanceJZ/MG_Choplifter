@@ -5,25 +5,25 @@ using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
-    using PO = Engine.PositionedObject;
+    using Sys = Services;
+    using Time = Timer;
+    using PO = PositionedObject;
+    using Mod = AModel;
 
-    public class HouseControl : GameComponent, Engine.IBeginable, Engine.IUpdateableComponent, Engine.ILoadContent
+    public class HouseControl : GameComponent, IBeginable, IUpdateableComponent, ILoadContent
     {
-        Engine.AModel[] Houses = new Engine.AModel[4];
-        Engine.AModel[] OpenHouses = new Engine.AModel[4];
+        Mod[] Houses = new Mod[4];
+        Mod[] OpenHouses = new Mod[4];
 
         List<Person> People = new List<Person>();
 
-        //Person TestPerson;
-
         ThePlayer PlayerRef;
 
-        XnaModel PersonBody;
+        XnaModel PersonMan;
         XnaModel PersonArm;
         XnaModel PersonLeg;
 
@@ -35,12 +35,10 @@ namespace MGChoplifter.Entities
         {
             PlayerRef = player;
 
-            //TestPerson = new Person(game, player);
-
             for (int i = 0; i < Houses.Length; i++)
             {
-                Houses[i] = new Engine.AModel(game);
-                OpenHouses[i] = new Engine.AModel(game);
+                Houses[i] = new Mod(game);
+                OpenHouses[i] = new Mod(game);
             }
 
             game.Components.Add(this);
@@ -50,10 +48,8 @@ namespace MGChoplifter.Entities
         {
             base.Initialize();
 
-            S.AddBeginable(this);
-            S.AddLoadable(this);
-
-            //TestPerson.Position = new Vector3(-200, -225, 0);
+            Sys.AddBeginable(this);
+            Sys.AddLoadable(this);
         }
 
         public void LoadContent()
@@ -67,11 +63,13 @@ namespace MGChoplifter.Entities
                 OpenHouses[i].SetModel(openModel);
             }
 
-            PersonBody = Game.Content.Load<XnaModel>("Models/CLPersonMan");
+            PersonMan = Game.Content.Load<XnaModel>("Models/CLPersonMan");
             PersonArm = Game.Content.Load<XnaModel>("Models/CLPersonArm");
             PersonLeg = Game.Content.Load<XnaModel>("Models/CLPersonLeg");
 
-            //SpawnPeople(TestPerson.Position);
+            PlayerRef.PersonMan = PersonMan;
+            PlayerRef.PersonArm = PersonArm;
+            PlayerRef.PersonLeg = PersonLeg;
         }
 
         public void BeginRun()
@@ -83,22 +81,13 @@ namespace MGChoplifter.Entities
                 OpenHouses[i].Position = Houses[i].Position;
                 OpenHouses[i].Active = false;
             }
-
-            //TestPerson.SetModel(PersonBody);
-
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    TestPerson.Arms[i].SetModel(PersonArm);
-            //    TestPerson.Legs[i].SetModel(PersonLeg);
-            //}
-
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            foreach (Engine.AModel house in Houses)
+            foreach (Mod house in Houses)
             {
                 if (house.Active)
                 {
@@ -121,7 +110,7 @@ namespace MGChoplifter.Entities
 
         void HouseHit(Vector3 position)
         {
-            foreach (Engine.AModel house in OpenHouses)
+            foreach (Mod house in OpenHouses)
             {
                 if (house.Position == position)
                 {
@@ -144,7 +133,7 @@ namespace MGChoplifter.Entities
                     if (!man.Active)
                     {
                         spawnNew = false;
-                        man.Spawn(position);
+                        man.Spawn(position, false);
                         break;
                     }
                 }
@@ -152,15 +141,15 @@ namespace MGChoplifter.Entities
                 if (spawnNew)
                 {
                     People.Add(new Person(Game, PlayerRef));
-                    People.Last().SetModel(PersonBody);
+                    People.Last().SetModel(PersonMan);
 
-                    for (int i = 0; i < 2; i++) //Figure out why arms and legs are invisable.
+                    for (int i = 0; i < 2; i++)
                     {
                         People.Last().Arms[i].SetModel(PersonArm);
                         People.Last().Legs[i].SetModel(PersonLeg);
                     }
 
-                    People.Last().Spawn(position);
+                    People.Last().Spawn(position, false);
                 }
             }
         }

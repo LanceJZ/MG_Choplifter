@@ -8,10 +8,11 @@ using System;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
+    using Sys = Engine.Services;
+    using Time = Engine.Timer;
+    using Mod = Engine.AModel;
 
-    public class Tank : Engine.AModel
+    public class Tank : Mod
     {
         public ThePlayer PlayerRef;
         TankTurret Turret;
@@ -36,9 +37,9 @@ namespace MGChoplifter.Entities
         {
             base.Initialize();
 
-            MaxSpeed = S.RandomMinMax(50, 100);
-            Seperation = S.RandomMinMax(100, 200);
-            RightBound = S.RandomMinMax(-1000, -1100);
+            MaxSpeed = Sys.RandomMinMax(50, 100);
+            Seperation = Sys.RandomMinMax(100, 200);
+            RightBound = Sys.RandomMinMax(-1000, -1100);
 
             Turret.AddAsChild(this, true, false);
             Turret.Position.Y = 10;

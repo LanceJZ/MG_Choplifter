@@ -7,9 +7,10 @@ using System;
 
 namespace MGChoplifter.Entities
 {
-    using S = Engine.Services;
-    using T = Engine.Timer;
+    using Sys = Engine.Services;
+    using Time = Engine.Timer;
     using PO = Engine.PositionedObject;
+    using Mod = Engine.AModel;
 
     public class Background : GameComponent, Engine.IBeginable, Engine.IUpdateableComponent, Engine.ILoadContent
     {
@@ -18,8 +19,8 @@ namespace MGChoplifter.Entities
         Engine.AModel Base;
 
         Engine.Plane[] Grass = new Engine.Plane[51];
-        Engine.AModel[] Blockades = new Engine.AModel[4];
-        Engine.AModel[] Mountians = new Engine.AModel[8];
+        Mod[] Blockades = new Mod[4];
+        Mod[] Mountians = new Mod[8];
 
         float spaceBetweenGrass = 85;
         float GrassEdge = 600;
@@ -47,11 +48,11 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < Blockades.Length; i++)
             {
-                Blockades[i] = new Engine.AModel(game);
+                Blockades[i] = new Mod(game);
             }
 
             Stars = new StarControl(game);
-            Base = new Engine.AModel(game);
+            Base = new Mod(game);
 
             game.Components.Add(this);
         }
@@ -60,8 +61,8 @@ namespace MGChoplifter.Entities
         {
             base.Initialize();
 
-            S.AddBeginable(this);
-            S.AddLoadable(this);
+            Sys.AddBeginable(this);
+            Sys.AddLoadable(this);
         }
 
         public void LoadContent()
@@ -152,7 +153,7 @@ namespace MGChoplifter.Entities
             {
                 if (PlayerRef.Velocity.X < 0)
                 {
-                    if (Grass[i].Position.X - spaceBetweenGrass > S.Camera.Position.X + GrassEdge)
+                    if (Grass[i].Position.X - spaceBetweenGrass > Sys.Camera.Position.X + GrassEdge)
                     {
                         Grass[i].Position.X -= 1200 + spaceBetweenGrass * 2;
                     }
@@ -160,7 +161,7 @@ namespace MGChoplifter.Entities
 
                 if (PlayerRef.Velocity.X > 0)
                 {
-                    if (Grass[i].Position.X + spaceBetweenGrass < S.Camera.Position.X - GrassEdge)
+                    if (Grass[i].Position.X + spaceBetweenGrass < Sys.Camera.Position.X - GrassEdge)
                     {
                         Grass[i].Position.X += 1200 + spaceBetweenGrass * 2;
                     }
@@ -169,12 +170,12 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < Blockades.Length; i++)
             {
-                Blockades[i].Position.X = BlocksX[i] - ((S.Camera.Position.X - BlocksX[i]) * (0.2f * i));
+                Blockades[i].Position.X = BlocksX[i] - ((Sys.Camera.Position.X - BlocksX[i]) * (0.2f * i));
             }
 
             for (int i = 0; i < Mountians.Length; i++)
             {
-                Mountians[i].Position.X = MountianX[i] + (S.Camera.Position.X * 0.35f);
+                Mountians[i].Position.X = MountianX[i] + (Sys.Camera.Position.X * 0.35f);
             }
         }
     }
