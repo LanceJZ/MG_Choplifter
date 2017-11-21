@@ -54,18 +54,18 @@ namespace MGChoplifter.Entities
 
         public void LoadContent()
         {
-            XnaModel houseModel = Game.Content.Load<XnaModel>("Models/CLHouse");
-            XnaModel openModel = Game.Content.Load<XnaModel>("Models/CLHouseOpen");
+            Houses[0].LoadModel("CLHouse");
+            OpenHouses[0].LoadModel("CLHouseOpen");
 
-            for (int i = 0; i < Houses.Length; i++)
+            for (int i = 1; i < Houses.Length; i++)
             {
-                Houses[i].SetModel(houseModel);
-                OpenHouses[i].SetModel(openModel);
+                Houses[i].SetModel(Houses[0].XNAModel);
+                OpenHouses[i].SetModel(OpenHouses[0].XNAModel);
             }
 
-            PersonMan = Game.Content.Load<XnaModel>("Models/CLPersonMan");
-            PersonArm = Game.Content.Load<XnaModel>("Models/CLPersonArm");
-            PersonLeg = Game.Content.Load<XnaModel>("Models/CLPersonLeg");
+            PersonMan = PlayerRef.Load("CLPersonMan");
+            PersonArm = PlayerRef.Load("CLPersonArm");
+            PersonLeg = PlayerRef.Load("CLPersonLeg");
 
             PlayerRef.PersonMan = PersonMan;
             PlayerRef.PersonArm = PersonArm;
@@ -140,8 +140,7 @@ namespace MGChoplifter.Entities
 
                 if (spawnNew)
                 {
-                    People.Add(new Person(Game, PlayerRef));
-                    People.Last().SetModel(PersonMan);
+                    People.Add(new Person(Game, PlayerRef, PersonMan));
 
                     for (int i = 0; i < 2; i++)
                     {

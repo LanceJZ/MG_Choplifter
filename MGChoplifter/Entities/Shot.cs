@@ -16,7 +16,7 @@ namespace MGChoplifter.Entities
     {
         Time LifeTimer;
 
-        public Shot(Game game) : base(game)
+        public Shot(Game game, XnaModel model) : base(game, model)
         {
             LifeTimer = new Time(game);
         }

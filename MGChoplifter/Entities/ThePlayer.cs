@@ -5,12 +5,11 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using Sys = Engine.Services;
-    using Time = Engine.Timer;
-    using Mod = Engine.AModel;
+    using Mod = AModel;
 
     public class ThePlayer : Mod
     {
@@ -35,9 +34,9 @@ namespace MGChoplifter.Entities
         Mod MainBlade;
         Mod Rotor;
 
-        Time FireTimer;
-        Time TurnTimer;
-        Time UnloadTimer;
+        Timer FireTimer;
+        Timer TurnTimer;
+        Timer UnloadTimer;
 
         KeyboardState KeyState;
         KeyboardState KeyStateOld;
@@ -71,49 +70,34 @@ namespace MGChoplifter.Entities
         {
             MainBlade = new Mod(game);
             Rotor = new Mod(game);
-            FireTimer = new Time(game, FireRate);
-            TurnTimer = new Time(game, TurnRate);
-            UnloadTimer = new Time(game, UnloadRate);
-
-            for(int i = 0; i < ShotLimit; i++)
-            {
-                Shots[i] = new Shot(game);
-            }
-
-            for (int i = 0; i < People.Length; i++)
-            {
-                People[i] = new Person(game, this);
-            }
+            FireTimer = new Timer(game, FireRate);
+            TurnTimer = new Timer(game, TurnRate);
+            UnloadTimer = new Timer(game, UnloadRate);
         }
 
         public override void Initialize()
         {
-            base.Initialize();
+            Services.AddBeginable(this);
 
             Radius = 26;
             Facing = Direction.Right;
             State = CurrentState.Flight;
-            NumberOfPassengers = 2; //TODO: For testing. Should be zero.
+            NumberOfPassengers = 0; //TODO: For testing. Should be zero.
+
+            base.Initialize();
         }
 
         public override void LoadContent()
         {
-            MainBlade.SetModel(Game.Content.Load<XnaModel>("Models/CLPlayerMainBlade"));
-            Rotor.SetModel(Game.Content.Load<XnaModel>("Models/CLPlayerRotor"));
-            SetModel(Game.Content.Load<XnaModel>("Models/CLPlayerChopper"));
+            MainBlade.LoadModel("CLPlayerMainBlade");
+            Rotor.LoadModel("CLPlayerRotor");
+            LoadModel("CLPlayerChopper");
 
-            XnaModel shotM = Game.Content.Load<XnaModel>("Models/cube");
-
-            for (int i = 0; i < ShotLimit; i++)
-            {
-                Shots[i].SetModel(shotM);
-            }
+            Shots[0] = new Shot(Game, Load("cube"));
         }
 
         public override void BeginRun()
         {
-            base.BeginRun();
-
             MainBlade.AddAsChild(this, true, false);
             Rotor.AddAsChild(this, true, false);
 
@@ -124,7 +108,7 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < People.Length; i++)
             {
-                People[i].SetModel(PersonMan);
+                People[i] = new Person(Game, this, PersonMan);
 
                 for (int ii = 0; ii < 2; ii++)
                 {
@@ -132,13 +116,17 @@ namespace MGChoplifter.Entities
                     People[i].Legs[ii].SetModel(PersonLeg);
                 }
             }
+
+            for (int i = 1; i < ShotLimit; i++)
+            {
+                Shots[i] = new Shot(Game, Shots[0].XNAModel);
+            }
+
+            base.BeginRun();
         }
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
-            Sys.Camera.Position.X = Position.X;
 
             GetInput();
             TeltChopper();
@@ -155,6 +143,9 @@ namespace MGChoplifter.Entities
 
             if (Coasting)
                 WindResistance();
+
+            base.Update(gameTime);
+            Services.Camera.Position.X = Position.X;
         }
 
         public bool PickUpPerson()
@@ -196,8 +187,8 @@ namespace MGChoplifter.Entities
 
                 if (NumberOfPassengers > 0)
                 {
-                    Vector3 pos = new Vector3(Position.X, BoundLowY - 5, People[NumberOfPassengers].Position.Z);
-                    People[NumberOfPassengers].Spawn(pos, true);
+                    Vector3 pos = new Vector3(Position.X, BoundLowY - 5, People[NumberOfPassengers - 1].Position.Z);
+                    People[NumberOfPassengers - 1].Spawn(pos, true);
                     NumberOfPassengers--;
                 }
             }
@@ -293,6 +284,7 @@ namespace MGChoplifter.Entities
                 }
             }
 
+            //Check keys before this. ----------------
             KeyStateOld = KeyState;
         }
 
@@ -362,7 +354,14 @@ namespace MGChoplifter.Entities
 
         void MoveX(Vector3 direction)
         {
-            Velocity.X = MathHelper.Clamp(Velocity.X, -MaxSpeed, MaxSpeed);
+            float maxX = MaxSpeed;
+
+            if (Facing == Direction.ForwardFromLeft || Facing == Direction.ForwardFromRight)
+            {
+                maxX *= 0.5f;
+            }
+
+            Velocity.X = MathHelper.Clamp(Velocity.X, -maxX, maxX);
             Acceleration = direction;
             float Deceration = 1.1f;
             Acceleration.Y = -Velocity.Y * Deceration;

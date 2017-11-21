@@ -91,6 +91,8 @@ namespace Engine
             {
                 begin.BeginRun();
             }
+
+            m_Beginable.Clear();
         }
 
         protected override void LoadContent()
@@ -99,6 +101,8 @@ namespace Engine
             {
                 load.LoadContent();
             }
+
+            m_Loadable.Clear();
         }
 
         public override void Draw(GameTime gameTime)

@@ -5,14 +5,15 @@ using System.Xml;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using XNAModel = Microsoft.Xna.Framework.Graphics.Model;
+using Microsoft.Xna.Framework.Audio;
+using XnaModel = Microsoft.Xna.Framework.Graphics.Model;
 #endregion
 
 namespace Engine
 {
     public class AModel : PositionedObject, IDrawComponent, ILoadContent
     {
-        public XNAModel xnaModel { get; private set; }
+        public XnaModel XNAModel { get; private set; }
         public bool Visable { get => m_Visable; set => m_Visable = value; }
 
         Texture2D XNATexture;
@@ -25,14 +26,18 @@ namespace Engine
 
         }
 
-        public AModel(Game game, XNAModel model, Texture2D texture) : base(game)
+        public AModel(Game game, XnaModel model) : base(game)
+        {
+            SetModel(model);
+        }
+
+        public AModel(Game game, XnaModel model, Texture2D texture) : base(game)
         {
             SetModel(model, texture);
         }
 
         public override void Initialize()
         {
-            base.Initialize();
             Enabled = true;
             Services.AddDrawableComponent(this);
             Services.AddLoadable(this);
@@ -41,12 +46,14 @@ namespace Engine
             Services.GraphicsDM.GraphicsDevice.SamplerStates[0] = SamplerState.AnisotropicWrap;
             Services.GraphicsDM.GraphicsDevice.BlendState = BlendState.Opaque;
             Services.GraphicsDM.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+
+            base.Initialize();
         }
 
         public override void BeginRun()
         {
-            base.BeginRun();
 
+            base.BeginRun();
         }
 
         public override void Update(GameTime gameTime)
@@ -86,10 +93,10 @@ namespace Engine
         {
             if (Active && Visable)
             {
-                if (xnaModel == null)
+                if (XNAModel == null)
                     return;
 
-                foreach (ModelMesh mesh in xnaModel.Meshes)
+                foreach (ModelMesh mesh in XNAModel.Meshes)
                 {
                     foreach (ModelMeshPart meshPart in mesh.MeshParts)
                     {
@@ -106,22 +113,65 @@ namespace Engine
             }
         }
 
-        public void SetModel(XNAModel model)
+        public void SetModel(XnaModel model)
         {
-            SetModel(model, null);
+            if (model != null)
+            {
+                XNAModel = model;
+
+                ModelTransforms = new Matrix[XNAModel.Bones.Count];
+                XNAModel.CopyAbsoluteBoneTransformsTo(ModelTransforms);
+            }
         }
 
-        public void SetModel(XNAModel model, Texture2D texture)
+        public void SetModel(XnaModel model, Texture2D texture)
         {
-            xnaModel = model;
             XNATexture = texture;
-            ModelTransforms = new Matrix[xnaModel.Bones.Count];
-            xnaModel.CopyAbsoluteBoneTransformsTo(ModelTransforms);
+
+            SetModel(model);
+        }
+
+        public void LoadModel(string modelName)
+        {
+            if (modelName != null)
+                XNAModel = Game.Content.Load<XnaModel>("Models/" + modelName);
+
+            SetModel(XNAModel);
+        }
+
+        public void LoadModel(string modelName, string textureName)
+        {
+            if (textureName != null)
+                XNATexture = Game.Content.Load<Texture2D>("Textures/" + textureName);
+
+            LoadModel(modelName);
+        }
+
+        public XnaModel Load(string modelName)
+        {
+            return Game.Content.Load<XnaModel>("Models/" + modelName);
+        }
+
+        public SoundEffect LoadSoundEffect(string soundName)
+        {
+            return Game.Content.Load<SoundEffect>("Sounds/" + soundName);
         }
 
         public virtual void LoadContent()
         {
+            //This method intentionally left blank.
+        }
 
+        public void Destroy()
+        {
+            if (ModelTransforms != null)
+                ModelTransforms.Initialize();
+
+            BaseWorld = Matrix.Identity;
+            XNAModel = null;
+            XNATexture = null;
+
+            Dispose();
         }
     }
 }

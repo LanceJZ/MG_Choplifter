@@ -1,22 +1,21 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using XnaModel = Microsoft.Xna.Framework.Graphics.Model;
 using Microsoft.Xna.Framework.Audio;
+using XnaModel = Microsoft.Xna.Framework.Graphics.Model;
 using System.Collections.Generic;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using Sys = Engine.Services;
-    using Time = Engine.Timer;
-    using PO = Engine.PositionedObject;
-    using Mod = Engine.AModel;
+    using PO = PositionedObject;
+    using Mod = AModel;
 
-    public class Background : GameComponent, Engine.IBeginable, Engine.IUpdateableComponent, Engine.ILoadContent
+    public class Background : GameComponent, IBeginable, IUpdateableComponent, ILoadContent
     {
         ThePlayer PlayerRef;
         StarControl Stars;
-        Engine.AModel Base;
+        Mod Base;
 
         Engine.Plane[] Grass = new Engine.Plane[51];
         Mod[] Blockades = new Mod[4];
@@ -38,7 +37,7 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < Mountians.Length; i++)
             {
-                Mountians[i] = new Engine.AModel(game);
+                Mountians[i] = new Mod(game);
             }
 
             for (int i = 0; i < Grass.Length; i++)
@@ -59,18 +58,18 @@ namespace MGChoplifter.Entities
 
         public override void Initialize()
         {
-            base.Initialize();
+            Services.AddBeginable(this);
+            Services.AddLoadable(this);
 
-            Sys.AddBeginable(this);
-            Sys.AddLoadable(this);
+            base.Initialize();
         }
 
         public void LoadContent()
         {
-            Base.SetModel(Game.Content.Load<XnaModel>("Models/CLBaseV2"), null);
-            XnaModel block = Game.Content.Load<XnaModel>("Models/CLBarakade");
-            XnaModel mount = Game.Content.Load<XnaModel>("Models/Mountain");
-            Texture2D grass = Game.Content.Load<Texture2D>("Textures/Grass");
+            Base.LoadModel("CLBaseV2");
+            XnaModel block = Blockades[0].Load("CLBarakade");
+            XnaModel mount = Mountians[0].Load("Mountain");
+            Texture2D grass = Grass[0].Load("Grass");
 
             for (int i = 0; i < Grass.Length; i++)
             {
@@ -137,9 +136,6 @@ namespace MGChoplifter.Entities
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
-
             for (int i = 0; i < Grass.Length / 3; i++)
             {
                 int leveltwo = i + (int)(Grass.Length / 3);
@@ -153,7 +149,7 @@ namespace MGChoplifter.Entities
             {
                 if (PlayerRef.Velocity.X < 0)
                 {
-                    if (Grass[i].Position.X - spaceBetweenGrass > Sys.Camera.Position.X + GrassEdge)
+                    if (Grass[i].Position.X - spaceBetweenGrass > Services.Camera.Position.X + GrassEdge)
                     {
                         Grass[i].Position.X -= 1200 + spaceBetweenGrass * 2;
                     }
@@ -161,7 +157,7 @@ namespace MGChoplifter.Entities
 
                 if (PlayerRef.Velocity.X > 0)
                 {
-                    if (Grass[i].Position.X + spaceBetweenGrass < Sys.Camera.Position.X - GrassEdge)
+                    if (Grass[i].Position.X + spaceBetweenGrass < Services.Camera.Position.X - GrassEdge)
                     {
                         Grass[i].Position.X += 1200 + spaceBetweenGrass * 2;
                     }
@@ -170,13 +166,15 @@ namespace MGChoplifter.Entities
 
             for (int i = 0; i < Blockades.Length; i++)
             {
-                Blockades[i].Position.X = BlocksX[i] - ((Sys.Camera.Position.X - BlocksX[i]) * (0.2f * i));
+                Blockades[i].Position.X = BlocksX[i] - ((Services.Camera.Position.X - BlocksX[i]) * (0.2f * i));
             }
 
             for (int i = 0; i < Mountians.Length; i++)
             {
-                Mountians[i].Position.X = MountianX[i] + (Sys.Camera.Position.X * 0.35f);
+                Mountians[i].Position.X = MountianX[i] + (Services.Camera.Position.X * 0.35f);
             }
+
+            base.Update(gameTime);
         }
     }
 }

@@ -1,58 +1,55 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using XnaModel = Microsoft.Xna.Framework.Graphics.Model;
 using System.Collections.Generic;
+using XnaModel = Microsoft.Xna.Framework.Graphics.Model;
+using MGChoplifter.Entities;
+using Engine;
 
 namespace MGChoplifter
 {
-    using PO = Engine.PositionedObject;
-    using S = Engine.Services;
-    using E = Entities;
+    using PO = PositionedObject;
+    using GameServices = Services;
 
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
     public class Game1 : Game
     {
-        GraphicsDeviceManager GraphicsDM;
-        SpriteBatch spriteBatch;
+        uint FramesPS = 0;
+        uint TotalFrames = 0;
+        uint FrameSeconds = 0;
 
-        Engine.AModel cubeTest;
+        GraphicsDeviceManager Graphics;
+        SpriteBatch SpriteBatch;
+        Timer FPSTimer;
 
-        List<Engine.AModel> ModelTest = new List<Engine.AModel>();
-
-        E.ThePlayer Player;
-        E.HouseControl Houses;
-        E.Background Background;
-        E.EnemyControl Enemies;
+        ThePlayer Player;
+        HouseControl Houses;
+        Background Background;
+        EnemyControl Enemies;
 
         public Game1()
         {
-            for (int i = 0; i < 17; i++)
-            {
-                //ModelTest.Add(new Engine.AModel(this));
-            }
-
-            cubeTest = new Engine.AModel(this);
-
-            GraphicsDM = new GraphicsDeviceManager(this);
-            GraphicsDM.IsFullScreen = false;
-            GraphicsDM.SynchronizeWithVerticalRetrace = true;
-            GraphicsDM.GraphicsProfile = GraphicsProfile.HiDef;
-            GraphicsDM.PreferredBackBufferWidth = 1200;
-            GraphicsDM.PreferredBackBufferHeight = 900;
-            GraphicsDM.PreferMultiSampling = true; //Error in MonoGame 3.6 for DirectX, fixed for dev version.
-            GraphicsDM.PreparingDeviceSettings += SetMultiSampling;
-            GraphicsDM.ApplyChanges();
-            GraphicsDM.GraphicsDevice.RasterizerState = new RasterizerState();
+            Graphics = new GraphicsDeviceManager(this);
+            Graphics.IsFullScreen = false;
+            Graphics.SynchronizeWithVerticalRetrace = true;
+            Graphics.GraphicsProfile = GraphicsProfile.HiDef;
+            Graphics.PreferredBackBufferWidth = 1200;
+            Graphics.PreferredBackBufferHeight = 900;
+            Graphics.PreferMultiSampling = true; //Error in MonoGame 3.6 for DirectX, fixed for dev version.
+            Graphics.PreparingDeviceSettings += SetMultiSampling;
+            Graphics.ApplyChanges();
+            Graphics.GraphicsDevice.RasterizerState = new RasterizerState(); //Must be after Apply Changes.
             IsFixedTimeStep = false;
             Content.RootDirectory = "Content";
 
-            Player = new E.ThePlayer(this);
-            Background = new E.Background(this, Player);
-            Enemies = new E.EnemyControl(this, Player);
-            Houses = new E.HouseControl(this, Player);
+            FPSTimer = new Timer(this, 1);
+
+            Player = new ThePlayer(this);
+            Background = new Background(this, Player);
+            Enemies = new EnemyControl(this, Player);
+            Houses = new HouseControl(this, Player);
         }
 
         private void SetMultiSampling(object sender, PreparingDeviceSettingsEventArgs eventArgs)
@@ -70,14 +67,21 @@ namespace MGChoplifter
         protected override void Initialize()
         {
             // Positive Y is Up. Positive X is Right.
-            S.Initialize(GraphicsDM, this, new Vector3(0, 0, 200), 0, 1000);
+            GameServices.Initialize(Graphics, this, new Vector3(0, 0, 200), 0, 1000);
             // Setup lighting.
-            S.DefuseLight = new Vector3(0.6f, 0.5f, 0.7f);
-            S.LightDirection = new Vector3(-0.75f, -0.75f, -0.5f);
-            S.SpecularColor = new Vector3(0.1f, 0, 0.5f);
-            S.AmbientLightColor = new Vector3(0.25f, 0.25f, 0.25f); // Add some overall ambient light.
+            GameServices.DefuseLight = new Vector3(0.6f, 0.5f, 0.7f);
+            GameServices.LightDirection = new Vector3(-0.75f, -0.75f, -0.5f);
+            GameServices.SpecularColor = new Vector3(0.1f, 0, 0.5f);
+            GameServices.AmbientLightColor = new Vector3(0.25f, 0.25f, 0.25f); // Add some overall ambient light.
 
             base.Initialize();
+        }
+
+        protected override void BeginRun()
+        {
+            GameServices.BeginRun(); //This only happens once in a game.
+
+            base.BeginRun();
         }
 
         /// <summary>
@@ -86,50 +90,7 @@ namespace MGChoplifter
         /// </summary>
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            if (ModelTest.Count < 16)
-                return;
-
-            //cubeTest.LoadModel(Content.Load<XnaModel>("Models/Cube"));
-
-            //ModelTest[0].SetModel(Content.Load<XnaModel>("Models/CLHouse"));
-            //ModelTest[1].SetModel(Content.Load<XnaModel>("Models/CLPlayerChopper"));
-            //ModelTest[2].SetModel(Content.Load<XnaModel>("Models/CLTankBody"));
-            //ModelTest[3].SetModel(Content.Load<XnaModel>("Models/CLBarakade"));
-            //ModelTest[4].SetModel(Content.Load<XnaModel>("Models/CLBaseV2"));
-            //ModelTest[5].SetModel(Content.Load<XnaModel>("Models/CLHouseOpen"));
-            //ModelTest[6].SetModel(Content.Load<XnaModel>("Models/CLPersonArm"));
-            //ModelTest[7].SetModel(Content.Load<XnaModel>("Models/CLPersonLeg"));
-            //ModelTest[8].SetModel(Content.Load<XnaModel>("Models/CLPersonMan"));
-            //ModelTest[9].SetModel(Content.Load<XnaModel>("Models/CLPlayerMainBlade"));
-            //ModelTest[10].SetModel(Content.Load<XnaModel>("Models/CLPlayerRotor"));
-            //ModelTest[11].SetModel(Content.Load<XnaModel>("Models/CLTankBarral"));
-            //ModelTest[12].SetModel(Content.Load<XnaModel>("Models/CLTankTred1"));
-            //ModelTest[13].SetModel(Content.Load<XnaModel>("Models/CLTankTred2"));
-            //ModelTest[14].SetModel(Content.Load<XnaModel>("Models/CLTankTurret"));
-            //ModelTest[15].SetModel(Content.Load<XnaModel>("Models/Mountain"));
-        }
-
-        protected override void BeginRun()
-        {
-            base.BeginRun();
-
-            cubeTest.Scale = 10;
-
-            S.BeginRun(); //This only happens once in a game.
-
-            float posx = 0;
-            float posy = 0;
-
-            foreach (Engine.AModel mod in ModelTest)
-            {
-                mod.RotationVelocity = new Vector3(0, 0.5f, 0);
-                mod.Position = new Vector3(-360 + posx, -230 + posy, 0);
-
-                posx += 45;
-                posy += 28;
-            }
+            SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         }
 
@@ -150,6 +111,18 @@ namespace MGChoplifter
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            FramesPS++;
+
+            if (FPSTimer.Expired)
+            {
+                FPSTimer.Reset();
+                TotalFrames += FramesPS;
+                FrameSeconds++;
+                float average = TotalFrames / FrameSeconds;
+                System.Diagnostics.Debug.WriteLine("FPS " + FramesPS.ToString() + " Average " + average.ToString());
+                FramesPS = 0;
+            }
 
             base.Update(gameTime);
         }

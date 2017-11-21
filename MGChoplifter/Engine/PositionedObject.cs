@@ -25,11 +25,11 @@ namespace Engine
         public Vector3 WorldRotation = Vector3.Zero;
         public Vector3 RotationVelocity = Vector3.Zero;
         public Vector3 RotationAcceleration = Vector3.Zero;
-		public Rectangle AABB = Rectangle.Empty; // The axis-aligned bounding box.
 		//short[] indexData; // The index array used to render the AABB.
 		//VertexPositionColor[] aabbVertices; // The AABB vertex array (used for rendering).
 		float m_ScalePercent = 1;
 		float m_Radius = 0;
+        Vector2 m_HeightWidth;
 		bool m_Hit = false;
 		bool m_ExplosionActive = false;
 		bool m_Pause = false;
@@ -91,27 +91,43 @@ namespace Engine
 		/// Gets or sets the GameModel's AABB
 		/// </summary>
 		public bool Debug { set => m_Debug = value; }
-		#endregion
-		#region Constructor
-		/// <summary>
-		/// This is the constructor that gets the Positioned Object ready for use and adds it to the Drawable Components list.
-		/// </summary>
-		/// <param name="game">The game class</param>
-		public PositionedObject(Game game) : base(game)
+
+        public Vector2 WidthHeight { get => m_HeightWidth; set => m_HeightWidth = value; }
+
+        public Rectangle BoundingBox
+        {
+            get
+            {
+                return new Rectangle((int)Position.X, (int)Position.Y, (int)WidthHeight.X, (int)WidthHeight.Y);
+            }
+        }
+        #endregion
+        #region Constructor
+        /// <summary>
+        /// This is the constructor that gets the Positioned Object ready for use and adds it to the Drawable Components list.
+        /// </summary>
+        /// <param name="game">The game class</param>
+        public PositionedObject(Game game) : base(game)
 		{
 			game.Components.Add(this);
-
 		}
-		#endregion
-		#region Public Methods
-		/// <summary>
-		/// Allows the game component to be updated.
-		/// </summary>
-		/// <param name="gameTime">Provides a snapshot of timing values.</param>
-		public override void Update(GameTime gameTime)
-		{
-			base.Update(gameTime);
+        #endregion
+        #region Public Methods
+        public override void Initialize()
+        {
+            base.Initialize();
+        }
 
+        public virtual void BeginRun()
+        {
+
+        }
+        /// <summary>
+        /// Allows the game component to be updated.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        public override void Update(GameTime gameTime)
+		{
 			if (Moveable && Active)
 			{
 				base.Update(gameTime);
@@ -119,28 +135,8 @@ namespace Engine
 				m_ElapsedGameTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 				Velocity += Acceleration * m_ElapsedGameTime;
 				Position += Velocity * m_ElapsedGameTime;
-				AABB.X = (int)(Position.X);
-				AABB.Y = (int)(Position.Y);
 				RotationVelocity += RotationAcceleration * m_ElapsedGameTime;
 				Rotation += RotationVelocity * m_ElapsedGameTime;
-
-				//if (Rotation.X > MathHelper.TwoPi)
-				//	Rotation.X = -MathHelper.TwoPi;
-
-				//if (Rotation.Y < -MathHelper.TwoPi)
-				//	Rotation.Y = MathHelper.TwoPi;
-
-    //            if (Rotation.Z > MathHelper.TwoPi)
-    //                Rotation.Z = -MathHelper.TwoPi;
-
-    //            if (Rotation.X < -MathHelper.TwoPi)
-    //                Rotation.X = MathHelper.TwoPi;
-
-    //            if (Rotation.Y > MathHelper.TwoPi)
-    //                Rotation.Y = -MathHelper.TwoPi;
-
-    //            if (Rotation.Z < -MathHelper.TwoPi)
-    //                Rotation.Z = MathHelper.TwoPi;
             }
 
             if (m_Child)
@@ -160,21 +156,10 @@ namespace Engine
 
                 if (ActiveDependent)
 					Active = ParentPO.Active;
-			}
-		}
 
-		public override void Initialize()
-		{
-			base.Initialize();
-
-			AABB = new Rectangle();
-			Services.AddBeginable(this);
-		}
-
-		public virtual void BeginRun()
-		{
-
-		}
+                base.Update(gameTime);
+            }
+        }
         /// <summary>
         /// Add PO class or base PO class from AModel or Sprite as child of this class.
         /// </summary>
@@ -189,17 +174,8 @@ namespace Engine
             ParentPO = Parent;
             ParentPO.Parent = true;
 		}
-        /// <summary>
-        /// AABB collusion detection.
-        /// </summary>
-        /// <param name="heightWidth">Size of AABB height and width.</param>
-		public void SetAABB(Vector2 heightWidth)
-		{
-			AABB = new Rectangle((int)Position.X, (int)Position.Y, (int)(heightWidth.X * m_ScalePercent),
-				(int)(heightWidth.Y * m_ScalePercent));
-		}
 
-		public void Remove()
+        public void Remove()
 		{
 			Game.Components.Remove(this);
 		}

@@ -5,12 +5,11 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using Sys = Engine.Services;
-    using Time = Engine.Timer;
-    using Mod = Engine.AModel;
+    using Mod = AModel;
 
     public class Person : Mod
     {
@@ -23,12 +22,13 @@ namespace MGChoplifter.Entities
         enum CurrentMode
         {
             Waiting,
-            DroppedOff
+            DroppedOff,
+            Enter
         };
 
         CurrentState State;
         CurrentMode Mode;
-        Time Attention;
+        Timer Attention;
         ThePlayer PlayerRef;
         public Mod[] Arms = new Mod[2];
         public Mod[] Legs = new Mod[2];
@@ -36,22 +36,20 @@ namespace MGChoplifter.Entities
         float MaxSpeed;
         float RightBound;
 
-        public Person(Game game, ThePlayer player) : base(game)
+        public Person(Game game, ThePlayer player, XnaModel model) : base(game, model)
         {
             PlayerRef = player;
-            Attention = new Time(game);
+            Attention = new Timer(game, Services.RandomMinMax(0.25f, 2));
         }
 
         public override void Initialize()
         {
-            base.Initialize();
-
             Radius = 10;
 
-            Position.Z = Sys.RandomMinMax(-49, -1);
-            Seperation = Sys.RandomNumber.Next(20, 200);
-            MaxSpeed = Sys.RandomNumber.Next(10, 25);
-            RightBound = Sys.RandomMinMax(-10000, -9000);
+            Position.Z = Services.RandomMinMax(-49, -1);
+            Seperation = Services.RandomNumber.Next(20, 200);
+            MaxSpeed = Services.RandomNumber.Next(10, 25);
+            RightBound = Services.RandomMinMax(-10000, -9000);
 
             for (int i = 0; i < 2; i++)
             {
@@ -74,14 +72,13 @@ namespace MGChoplifter.Entities
             Legs[0].Position.X = -1;
             Legs[1].Position.X = 1;
 
-            Attention.Reset(Sys.RandomMinMax(0.25f, 2));
             Active = false;
+
+            base.Initialize();
         }
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             if (Active)
             {
                 switch (Mode)
@@ -97,6 +94,10 @@ namespace MGChoplifter.Entities
                     case CurrentMode.DroppedOff:
                         RunToBase();
                         break;
+
+                    case CurrentMode.Enter:
+                        Entering();
+                        break;
                 }
 
                 switch (State)
@@ -110,6 +111,8 @@ namespace MGChoplifter.Entities
                         break;
                 }
             }
+
+            base.Update(gameTime);
         }
 
         public void Spawn(Vector3 position, bool dropped)
@@ -126,8 +129,41 @@ namespace MGChoplifter.Entities
             else
             {
                 Mode = CurrentMode.Waiting;
-                Position.X = position.X + Sys.RandomMinMax(-20, 20);
+                Position.X = position.X + Services.RandomMinMax(-20, 20);
                 SwitchToWaving();
+            }
+        }
+
+        void Entering()
+        {
+            if (PlayerRef.Position.Y > PlayerRef.BoundLowY + 10)
+            {
+                Mode = CurrentMode.Waiting;
+                State = CurrentState.Waving;
+                return;
+            }
+
+            if(State == CurrentState.Waving)
+            {
+                SwitchToRunning();
+            }
+
+            if (Position.X > PlayerRef.Position.X)
+                Velocity.X = -MaxSpeed;
+            else
+                Velocity.X = MaxSpeed;
+
+            if (CirclesIntersect(PlayerRef))
+            {
+                if (PlayerRef.PickUpPerson())
+                {
+                    Active = false;
+                }
+                else
+                {
+                    Mode = CurrentMode.Waiting;
+                    State = CurrentState.Waving;
+                }
             }
         }
 
@@ -147,24 +183,34 @@ namespace MGChoplifter.Entities
         void ChaseOrWave()
         {
             Velocity.X = 0;
-            float differnceX = PlayerRef.Position.X - Position.X;
 
-            if (differnceX > Seperation && PlayerRef.Position.X < RightBound)
+            if (PlayerRef.Position.X > RightBound)
             {
-                Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
-
-                if (State == CurrentState.Waving)
+                if (PlayerRef.Position.Y < PlayerRef.BoundLowY + 10)
                 {
-                    SwitchToRunning();
+                    Mode = CurrentMode.Enter;
+                    return;
                 }
-            }
-            else if (differnceX < -Seperation && PlayerRef.Position.X > PlayerRef.BoundLeftX)
-            {
-                Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
 
-                if (State == CurrentState.Waving)
+                float differnceX = PlayerRef.Position.X - Position.X;
+
+                if (differnceX > Seperation)
                 {
-                    SwitchToRunning();
+                    Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
+
+                    if (State == CurrentState.Waving)
+                    {
+                        SwitchToRunning();
+                    }
+                }
+                else if (differnceX < -Seperation)
+                {
+                    Velocity.X = MathHelper.Clamp(differnceX, -MaxSpeed, MaxSpeed);
+
+                    if (State == CurrentState.Waving)
+                    {
+                        SwitchToRunning();
+                    }
                 }
             }
             else

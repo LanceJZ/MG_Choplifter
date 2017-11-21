@@ -5,14 +5,11 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using Sys = Engine.Services;
-    using Time = Engine.Timer;
-    using Mod = Engine.AModel;
-
-    public class Tank : Mod
+    public class Tank : AModel
     {
         public ThePlayer PlayerRef;
         TankTurret Turret;
@@ -20,11 +17,14 @@ namespace MGChoplifter.Entities
         float MaxSpeed;
         float Seperation;
         float RightBound;
+        bool CollidedR;
+        bool CollidedL;
 
         public Tank(Game game, ThePlayer player) : base(game)
         {
-            Turret = new TankTurret(game, player);
             PlayerRef = player;
+            Turret = new TankTurret(game, player);
+            Active = false;
 
             for (int i = 0; i < 2; i++)
             {
@@ -37,27 +37,28 @@ namespace MGChoplifter.Entities
         {
             base.Initialize();
 
-            MaxSpeed = Sys.RandomMinMax(50, 100);
-            Seperation = Sys.RandomMinMax(100, 200);
-            RightBound = Sys.RandomMinMax(-1000, -1100);
+            MaxSpeed = Services.RandomMinMax(50, 100);
+            Seperation = Services.RandomMinMax(100, 200);
+            RightBound = Services.RandomMinMax(-1000, -1100);
 
             Turret.AddAsChild(this, true, false);
-            Turret.Position.Y = 10;
-
-            Treds[0].Position = new Vector3(0, -2, -16);
-            Treds[1].Position = new Vector3(0, -2, 16);
-
+            Position.Y = -280;
+            Radius = 24;
+            LoadContent();
         }
 
         public override void LoadContent()
         {
             SetModel(Game.Content.Load<XnaModel>("Models/CLTankBody"));
-            Turret.LoadContent();
+            BeginRun();
         }
 
         public override void BeginRun()
         {
-            base.BeginRun();
+            Turret.Position.Y = 10;
+
+            Treds[0].Position = new Vector3(0, -2, -16);
+            Treds[1].Position = new Vector3(0, -2, 16);
         }
 
         public override void Update(GameTime gameTime)
@@ -69,10 +70,39 @@ namespace MGChoplifter.Entities
                 tred.Moving = false;
             }
 
+            FollowPlayer();
+
+        }
+
+        public void Spawn()
+        {
+            Position.X = Services.RandomMinMax(-3000, -8000);
+            Active = true;
+        }
+
+        public void BumpedR()
+        {
+            CollidedR = true;
+        }
+
+        public void BumpedL()
+        {
+            CollidedL = true;
+        }
+
+        public void NotBumped()
+        {
+            CollidedL = false;
+            CollidedR = false;
+        }
+
+        void FollowPlayer()
+        {
             Velocity.X = 0;
+
             float differnceX = PlayerRef.Position.X - Position.X;
 
-            if (differnceX > Seperation && PlayerRef.Position.X < RightBound)
+            if (differnceX > Seperation && PlayerRef.Position.X < RightBound && !CollidedR)
             {
                 Velocity.X = MathHelper.Clamp(differnceX * 0.1f, -MaxSpeed, MaxSpeed);
 
@@ -82,7 +112,7 @@ namespace MGChoplifter.Entities
                 }
             }
 
-            if (differnceX < -Seperation && PlayerRef.Position.X > PlayerRef.BoundLeftX)
+            if (differnceX < -Seperation && PlayerRef.Position.X > PlayerRef.BoundLeftX && !CollidedL)
             {
                 Velocity.X = MathHelper.Clamp(differnceX * 0.1f, -MaxSpeed, MaxSpeed);
                 foreach (TankTred tred in Treds)

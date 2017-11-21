@@ -50,7 +50,7 @@ namespace MGChoplifter.Entities
         {
             for (int i = 0; i < Stars.Length; i++)
             {
-                Stars[i].SetModel(Game.Content.Load<XnaModel>("Models/cube"), null);
+                Stars[i].LoadModel("cube");
             }
         }
 

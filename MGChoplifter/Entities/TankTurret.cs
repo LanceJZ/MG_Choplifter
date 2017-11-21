@@ -5,27 +5,23 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System;
+using Engine;
 
 namespace MGChoplifter.Entities
 {
-    using Sys = Engine.Services;
-    using Time = Engine.Timer;
-    using Mod = Engine.AModel;
-
-    public class TankTurret : Mod
+    public class TankTurret : AModel
     {
         public ThePlayer PlayerRef;
-        Mod Barral;
+        AModel Barral;
         Shot TankShot;
-        Time ShotTimer;
+        Timer ShotTimer;
 
         public TankTurret(Game game, ThePlayer player) : base(game)
         {
             PlayerRef = player;
 
-            Barral = new Mod(game);
-            TankShot = new Shot(game);
-            ShotTimer = new Time(game, 4.1f);
+            Barral = new AModel(game);
+            ShotTimer = new Timer(game, 4.1f);
         }
 
         public override void Initialize()
@@ -33,22 +29,24 @@ namespace MGChoplifter.Entities
             base.Initialize();
 
             Barral.AddAsChild(this, true, false);
-            TankShot.Active = false;
-            TankShot.Acceleration.Y = -50;
+            Barral.Position.X = 8;
+            LoadContent();
         }
 
         public override void LoadContent()
         {
             SetModel(Game.Content.Load<XnaModel>("Models/CLTankTurret"));
             Barral.SetModel(Game.Content.Load<XnaModel>("Models/CLTankBarral"));
-            TankShot.SetModel(Game.Content.Load<XnaModel>("Models/cube"));
+            TankShot = new Shot(Game, Load("cube"));
+            BeginRun();
         }
 
         public override void BeginRun()
         {
             base.BeginRun();
 
-            Barral.Position.X = 8;
+            TankShot.Active = false;
+            TankShot.Acceleration.Y = -50;
         }
 
         public override void Update(GameTime gameTime)
@@ -61,7 +59,7 @@ namespace MGChoplifter.Entities
 
             Barral.Rotation.Z = MathHelper.Clamp(AngleToBarral(pos, target), 0, MathHelper.PiOver4);
 
-            if (ShotTimer.Expired)
+            if (ShotTimer.Expired && Active)
             {
                 ShotTimer.Reset();
                 FireShot();

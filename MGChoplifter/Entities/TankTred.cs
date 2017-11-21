@@ -33,22 +33,23 @@ namespace MGChoplifter.Entities
 
         public override void Initialize()
         {
-            base.Initialize();
-
             Sys.AddLoadable(this);
+            base.Initialize();
+            LoadContent();
         }
 
         public void LoadContent()
         {
             TredAnimations[0].SetModel(Game.Content.Load<XnaModel>("Models/CLTankTred1"));
             TredAnimations[1].SetModel(Game.Content.Load<XnaModel>("Models/CLTankTred2"));
+            BeginRun();
         }
 
         public override void BeginRun()
         {
             base.BeginRun();
 
-            TredAnimations[0].Visable = false;
+            TredAnimations[1].Visable = false;
         }
 
         public override void Update(GameTime gameTime)

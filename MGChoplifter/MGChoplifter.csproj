@@ -50,6 +50,7 @@
     <Compile Include="Engine\Camera.cs" />
     <Compile Include="Engine\ILoadContent.cs" />
     <Compile Include="Engine\MeshInfo.cs" />
+    <Compile Include="Engine\Numbers.cs" />
     <Compile Include="Engine\Plane.cs" />
     <Compile Include="Engine\SModel.cs" />
     <Compile Include="Engine\IBeginRun.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Engine\SpriteFontDisplay.cs" />
     <Compile Include="Engine\SpritePositionedObject.cs" />
     <Compile Include="Engine\Timer.cs" />
+    <Compile Include="Engine\Words.cs" />
     <Compile Include="Entities\Background.cs" />
     <Compile Include="Entities\EnemyControl.cs" />
     <Compile Include="Entities\HouseControl.cs" />
@@ -137,10 +139,7 @@
     <None Include="app.config" />
     <None Include="app.manifest" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Content\Models\" />
-    <Folder Include="Content\Textures\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

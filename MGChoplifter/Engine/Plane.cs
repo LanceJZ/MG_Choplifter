@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using XnaModel = Microsoft.Xna.Framework.Graphics.Model;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
+using XnaModel = Microsoft.Xna.Framework.Graphics.Model;
 using System.Collections.Generic;
 using System;
 
@@ -91,6 +91,11 @@ namespace Engine
         public void ChangePlaneSize(float Width, float Height)
         {
             SetupPlane(Width, Height);
+        }
+
+        public Texture2D Load(string textureName)
+        {
+            return Game.Content.Load<Texture2D>("Textures/" + textureName);
         }
 
         void SetupPlane(float width, float height)
